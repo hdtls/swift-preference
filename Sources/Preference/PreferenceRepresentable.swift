@@ -139,7 +139,7 @@ extension URL: PreferenceRepresentable {
             case let val as String:
                 self = URL(fileURLWithPath: NSString(string: val).expandingTildeInPath)
             case let val as Data:
-                if #available(macOS 10.13, *) {
+                if #available(iOS 11.0, macOS 10.13, tvOS 11.0, watchOS 4.0, *) {
                     guard let url = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSURL.self, from: val) else {
                         return nil
                     }
