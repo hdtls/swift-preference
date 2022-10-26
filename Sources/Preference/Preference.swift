@@ -22,8 +22,8 @@
 //  THE SOFTWARE.
 //
 
-import Combine
-import Foundation
+@preconcurrency import Combine
+@preconcurrency import Foundation
 
 extension UserDefaults {
 
@@ -50,6 +50,10 @@ extension UserDefaults.FieldKey: ExpressibleByStringLiteral {
         self.init(rawValue: value)
     }
 }
+
+#if swift(>=5.5) && canImport(_Concurrency)
+extension UserDefaults.FieldKey: Sendable {}
+#endif
 
 /// A property wrapper type that reflects a value from `UserDefaults`
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -121,7 +125,7 @@ extension Preference where Value: ExpressibleByNilLiteral {
 extension Preference {
     
     @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-    public class Publisher: NSObject, Combine.Publisher {
+    final public class Publisher: NSObject, Combine.Publisher {
         
         public typealias Output = Value
         public typealias Failure = Never
@@ -257,3 +261,11 @@ extension Preference {
         }
     }
 }
+
+#if swift(>=5.5) && canImport(_Concurrency)
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+extension Preference: Sendable where Value: Sendable {}
+
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+extension Preference.Publisher: Sendable where Value: Sendable {}
+#endif
