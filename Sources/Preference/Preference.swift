@@ -26,21 +26,25 @@ import Combine
 import Foundation
 
 extension UserDefaults {
-    
-    /// UserDefaults DefaultName
-    public struct DefaultName: RawRepresentable {
-        
+
+    /// UserDefaults field key.
+    public struct FieldKey: RawRepresentable {
+
         public typealias RawValue = String
-        
+
         public var rawValue: String
-        
+
         public init(rawValue: String) {
             self.rawValue = rawValue
         }
     }
+
+    /// UserDefaults DefaultName
+    @available(*, deprecated, renamed: "FieldKey")
+    public typealias DefaultName = FieldKey
 }
 
-extension UserDefaults.DefaultName: ExpressibleByStringLiteral {
+extension UserDefaults.FieldKey: ExpressibleByStringLiteral {
     
     public init(stringLiteral value: StringLiteralType) {
         self.init(rawValue: value)
@@ -49,8 +53,7 @@ extension UserDefaults.DefaultName: ExpressibleByStringLiteral {
 
 /// A property wrapper type that reflects a value from `UserDefaults`
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-@propertyWrapper
-public struct Preference<Value> where Value: PreferenceRepresentable {
+@propertyWrapper public struct Preference<Value> where Value: PreferenceRepresentable {
     
     private let publisher: Publisher
     
@@ -76,7 +79,7 @@ public struct Preference<Value> where Value: PreferenceRepresentable {
     ///     store.
     ///   - store: The user defaults store to read and write to. A value
     ///     of `nil` will use the user default store from the environment.
-    public init(wrappedValue: Value, _ key: UserDefaults.DefaultName, store: UserDefaults? = nil) {
+    public init(wrappedValue: Value, _ key: UserDefaults.FieldKey, store: UserDefaults? = nil) {
         publisher = .init(wrappedValue: wrappedValue, key.rawValue, store: store)
     }
     
@@ -109,7 +112,7 @@ extension Preference where Value: ExpressibleByNilLiteral {
     ///     store.
     ///   - store: The user defaults store to read and write to. A value
     ///     of `nil` will use the user default store from the environment.
-    public init<O>(_ key: UserDefaults.DefaultName, store: UserDefaults? = nil) where Value == O? {
+    public init<O>(_ key: UserDefaults.FieldKey, store: UserDefaults? = nil) where Value == O? {
         publisher = .init(key.rawValue, store: store)
     }
 }
@@ -169,17 +172,17 @@ extension Preference {
         ///     store.
         ///   - store: The user defaults store to read and write to. A value
         ///     of `nil` will use the user default store from the environment.
-        public init(wrappedValue: Value, _ key: UserDefaults.DefaultName, store: UserDefaults? = nil) {
+        public init(wrappedValue: Value, _ key: UserDefaults.FieldKey, store: UserDefaults? = nil) {
             self.key = key.rawValue
             self.store = store ?? .standard
             self.wrappedValue = wrappedValue
-            
+
             if let val = self.store.object(forKey: key.rawValue) {
                 self.subject = .init(Value(preferenceValue: val) ?? wrappedValue)
             } else {
                 self.subject = .init(wrappedValue)
             }
-            
+
             super.init()
             self.store.addObserver(self, forKeyPath: key.rawValue, options: .new, context: nil)
         }
@@ -195,17 +198,17 @@ extension Preference {
             self.key = key
             self.store = store ?? .standard
             self.wrappedValue = nil
-            
+
             if let val = self.store.object(forKey: key) {
                 self.subject = .init(O(preferenceValue: val))
             } else {
                 self.subject = .init(wrappedValue)
             }
-            
+
             super.init()
             self.store.addObserver(self, forKeyPath: key, options: .new, context: nil)
         }
-        
+
         /// Creates a publisher that publish the current value for a user default.
         ///
         /// - Parameters:
@@ -213,25 +216,25 @@ extension Preference {
         ///     store.
         ///   - store: The user defaults store to read and write to. A value
         ///     of `nil` will use the user default store from the environment.
-        public init<O>(_ key: UserDefaults.DefaultName, store: UserDefaults? = nil) where Value == O? {
+        public init<O>(_ key: UserDefaults.FieldKey, store: UserDefaults? = nil) where Value == O? {
             self.key = key.rawValue
             self.store = store ?? .standard
             self.wrappedValue = nil
-            
+
             if let val = self.store.object(forKey: key.rawValue) {
                 self.subject = .init(O(preferenceValue: val))
             } else {
                 self.subject = .init(wrappedValue)
             }
-            
+
             super.init()
             self.store.addObserver(self, forKeyPath: key.rawValue, options: .new, context: nil)
         }
-        
+
         deinit {
             store.removeObserver(self, forKeyPath: key)
         }
-        
+
         public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
             guard keyPath == key else {
                 super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
