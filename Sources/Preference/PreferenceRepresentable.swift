@@ -146,10 +146,10 @@ extension URL: PreferenceRepresentable {
                     self = url as URL
                 } else {
                     // Fallback on earlier versions
-                    guard let url = NSKeyedUnarchiver.unarchiveObject(with: val) as? URL else {
+                    guard let url = NSKeyedUnarchiver.unarchiveObject(with: val) as? NSURL else {
                         return nil
                     }
-                    self = url
+                    self = url as URL
                 }
             default:
                 return nil
@@ -157,7 +157,11 @@ extension URL: PreferenceRepresentable {
     }
     
     public var preferenceValue: Any? {
-        self.absoluteURL.path
+        if #available(iOS 11.0, macOS 10.13, tvOS 11.0, watchOS 4.0, *) {
+            return try? NSKeyedArchiver.archivedData(withRootObject: self as NSURL, requiringSecureCoding: true)
+        } else {
+            return NSKeyedArchiver.archivedData(withRootObject: self as NSURL)
+        }
     }
 }
 
