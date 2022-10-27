@@ -8,7 +8,7 @@ Also we have a default implementation of `PreferenceRepresentable where Self: Ra
 
 ## Usage
 
-### There are two types `String`, `UserDefaults.DefaultName` can be used as default name
+### There are two types `String`, `UserDefaults.FieldKey` can be used as UserDefaults key field.
 
 ```swift
 // Use String as key
@@ -16,13 +16,13 @@ Also we have a default implementation of `PreferenceRepresentable where Self: Ra
 
 ...
 
-extension UserDefaults.DefaultName {
+extension UserDefaults.FieldKey {
     ...
     
-    static let isFlagged: UserDefaults.DefaultName = "isFlagged"
+    static let isFlagged: UserDefaults.FieldKey = "isFlagged"
 }
 
-// Use UserDefaults.DefaultName as key
+// Use UserDefaults.FieldKey as key
 @Preference(.isFlagged) var isFlagged = false
 ```
 
@@ -56,7 +56,7 @@ $isFlagged.sink {
 Add the following dependency to your **Package.swift** file:
 
 ```swift
-.package(url: "https://github.com/hdtls/swift-preference", from: "1.0.0")
+.package(url: "https://github.com/hdtls/swift-preference", from: "1.0.2")
 ```
 
 ## License

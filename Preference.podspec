@@ -14,4 +14,6 @@ Preference provides property wrapper for UserDefaults and custom Combine publish
   s.osx.deployment_target = '10.15'
 
   s.source_files = 'Sources/Preference/*.swift'
+
+  s.swift_version = '5'
 end
