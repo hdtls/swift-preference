@@ -152,6 +152,8 @@ extension Preference {
         ///   - store: The user defaults store to read and write to. A value
         ///     of `nil` will use the user default store from the environment.
         public init(wrappedValue: Value, _ key: String, store: UserDefaults? = nil) {
+            assert(!key.contains("."), "Do not use keys containing dots for UserDefaults KVO to work properly.")
+
             self.key = key
             self.store = store ?? .standard
             self.wrappedValue = wrappedValue
@@ -176,6 +178,8 @@ extension Preference {
         ///   - store: The user defaults store to read and write to. A value
         ///     of `nil` will use the user default store from the environment.
         public init(wrappedValue: Value, _ key: UserDefaults.FieldKey, store: UserDefaults? = nil) {
+            assert(!key.rawValue.contains("."), "Do not use keys containing dots for UserDefaults KVO to work properly.")
+
             self.key = key.rawValue
             self.store = store ?? .standard
             self.wrappedValue = wrappedValue
@@ -198,6 +202,8 @@ extension Preference {
         ///   - store: The user defaults store to read and write to. A value
         ///     of `nil` will use the user default store from the environment.
         public init<O>(_ key: String, store: UserDefaults? = nil) where Value == O? {
+            assert(!key.contains("."), "Do not use keys containing dots for UserDefaults KVO to work properly.")
+
             self.key = key
             self.store = store ?? .standard
             self.wrappedValue = nil
@@ -220,6 +226,8 @@ extension Preference {
         ///   - store: The user defaults store to read and write to. A value
         ///     of `nil` will use the user default store from the environment.
         public init<O>(_ key: UserDefaults.FieldKey, store: UserDefaults? = nil) where Value == O? {
+            assert(!key.rawValue.contains("."), "Do not use keys containing dots for UserDefaults KVO to work properly.")
+
             self.key = key.rawValue
             self.store = store ?? .standard
             self.wrappedValue = nil
