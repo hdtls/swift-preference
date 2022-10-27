@@ -39,25 +39,42 @@ extension String {
     }
 }
 
-let store: UserDefaults = .init(suiteName: UUID().uuidString)!
+let store: UserDefaults = .init(suiteName: "swift-preference/\(UUID().uuidString)")!
+
+extension UserDefaults.FieldKey {
+    static let boolValue: UserDefaults.FieldKey = "BoolValue"
+    static let optionalBoolValue: UserDefaults.FieldKey = "OptionalBoolValue"
+    static let intValue: UserDefaults.FieldKey = "IntValue"
+    static let optionalIntValue: UserDefaults.FieldKey = "OptionalIntValue"
+    static let doubleValue: UserDefaults.FieldKey = "DoubleValue"
+    static let optionalDoubleValue: UserDefaults.FieldKey = "OptionalDoubleValue"
+    static let floatValue: UserDefaults.FieldKey = "FloatValue"
+    static let optionalFloatValue: UserDefaults.FieldKey = "OptionalFloatValue"
+    static let stringValue: UserDefaults.FieldKey = "StringValue"
+    static let optionalStringValue: UserDefaults.FieldKey = "OptionalStringValue"
+    static let urlValue: UserDefaults.FieldKey = "URLValue"
+    static let optionalURLValue: UserDefaults.FieldKey = "OptionalURLValue"
+    static let dataValue: UserDefaults.FieldKey = "DataValue"
+    static let optionalDataValue: UserDefaults.FieldKey = "OptionalDataValue"
+}
 
 class PreferenceTests: XCTestCase {
 
     struct Preferences {
-        @Preference("DefaultName.StringValue", store: store) var stringValue: String = "yCtoi4BR"
-        @Preference("DefaultName.OptionalStringValue", store: store) var optionalStringValue: String?
-        @Preference("DefaultName.IntValue", store: store) var intValue: Int = 8
-        @Preference("DefaultName.OptionalIntValue", store: store) var optionalIntValue: Int?
-        @Preference("DefaultName.DoubleValue", store: store) var doubleValue: Double = 0.730964920633
-        @Preference("DefaultName.OptionalDoubleValue", store: store) var optionalDoubleValue: Double?
-        @Preference("DefaultName.FloatValue", store: store) var floatValue: Float = 1.314
-        @Preference("DefaultName.OptionalFloatValue", store: store) var optionalFloatValue: Float?
-        @Preference("DefaultName.URLValue", store: store) var urlValue: URL = URL(fileURLWithPath: "NOugvfZk")
-        @Preference("DefaultName.OptionalURLValue", store: store) var optionalURLValue: URL?
-        @Preference("DefaultName.BoolValue", store: store) var boolValue: Bool = true
-        @Preference("DefaultName.OptionalBoolValue", store: store) var optionalBoolValue: Bool?
-        @Preference("DefaultName.DataValue", store: store) var dataValue: Data = .init()
-        @Preference("DefaultName.OptionalDataValue", store: store) var optionalDataValue: Data?
+        @Preference(.boolValue, store: store) var boolValue: Bool = true
+        @Preference(.optionalBoolValue, store: store) var optionalBoolValue: Bool?
+        @Preference(.intValue, store: store) var intValue: Int = 5
+        @Preference(.optionalIntValue, store: store) var optionalIntValue: Int?
+        @Preference(.doubleValue, store: store) var doubleValue: Double = 0.07033802847862591
+        @Preference(.optionalDoubleValue, store: store) var optionalDoubleValue: Double?
+        @Preference(.floatValue, store: store) var floatValue: Float = 1.8874
+        @Preference(.optionalFloatValue, store: store) var optionalFloatValue: Float?
+        @Preference(.stringValue, store: store) var stringValue: String = "F1FOe4MS"
+        @Preference(.optionalStringValue, store: store) var optionalStringValue: String?
+        @Preference(.urlValue, store: store) var urlValue: URL = URL(string: "https://bY2ftCF4.com")!
+        @Preference(.optionalURLValue, store: store) var optionalURLValue: URL?
+        @Preference(.dataValue, store: store) var dataValue: Data = .init()
+        @Preference(.optionalDataValue, store: store) var optionalDataValue: Data?
     }
 
     var preferences: Preferences = .init()
@@ -69,367 +86,626 @@ class PreferenceTests: XCTestCase {
         cancellable.removeAll()
     }
         
-    func testStoreStringPreferenceValue() {
-        var stringValues: [String] = []
-        var expectValues: [String] = ["yCtoi4BR"]
-        
-        cancellable.insert(
-            preferences.$stringValue.sink {
-                stringValues.append($0)
-            }
-        )
-        
-        XCTAssertEqual(preferences.stringValue, "yCtoi4BR")
-        
-        for _ in 0..<10 {
-            let newValue = String.random()
-            expectValues.append(newValue)
-            preferences.stringValue = newValue
-            XCTAssertEqual(preferences.stringValue, newValue)
-            XCTAssertEqual(store.string(forKey: "DefaultName.StringValue"), newValue)
-        }
-
-        XCTAssertEqual(stringValues, expectValues)
-    }
-    
-    func testStoreOptionalStringPreferenceValue() {
-        var optionalStringValues: [String?] = []
-        var expectValues: [String?] = [nil]
-        
-        cancellable.insert(
-            preferences.$optionalStringValue.sink {
-                optionalStringValues.append($0)
-            }
-        )
-        
-        XCTAssertNil(preferences.optionalStringValue)
-        XCTAssertNil(store.object(forKey: "DefaultName.OptionalStringValue"))
-        
-        for _ in 0..<10 {
-            let allowedValues = [nil, String.random()]
-            let newValue = allowedValues.randomElement()!
-            expectValues.append(newValue)
-            preferences.optionalStringValue = newValue
-            XCTAssertEqual(preferences.optionalStringValue, newValue)
-            if newValue == nil {
-                XCTAssertNil(store.object(forKey: "DefaultName.OptionalStringValue"))
-            } else {
-                XCTAssertEqual(store.string(forKey: "DefaultName.OptionalStringValue"), newValue)
-            }
-        }
-        
-        XCTAssertEqual(optionalStringValues, expectValues)
-    }
-        
-    func testStoreIntPreferenceValue() {
-        var intValues: [Int] = []
-        var expectValues: [Int] = [8]
-        
-        cancellable.insert(
-            preferences.$intValue.sink {
-                intValues.append($0)
-            }
-        )
-        
-        XCTAssertEqual(preferences.intValue, 8)
-        
-        for _ in 0..<10 {
-            let newValue = Int.random(in: 0...255)
-            expectValues.append(newValue)
-            preferences.intValue = newValue
-            XCTAssertEqual(preferences.intValue, newValue)
-            XCTAssertEqual(store.integer(forKey: "DefaultName.IntValue"), newValue)
-        }
-
-        XCTAssertEqual(intValues, expectValues)
-    }
-    
-    func testStoreOptionalIntPreferenceValue() {
-        var optionalIntValues: [Int?] = []
-        var expectValues: [Int?] = [nil]
-        
-        cancellable.insert(
-            preferences.$optionalIntValue.sink {
-                optionalIntValues.append($0)
-            }
-        )
-        
-        XCTAssertNil(preferences.optionalIntValue)
-        XCTAssertNil(store.object(forKey: "DefaultName.OptionalIntValue"))
-        
-        for _ in 0..<10 {
-            let allowedValues = [nil, Int.random(in: 0...255)]
-            let newValue = allowedValues.randomElement()!
-            expectValues.append(newValue)
-            preferences.optionalIntValue = newValue
-            XCTAssertEqual(preferences.optionalIntValue, newValue)
-            if newValue == nil {
-                XCTAssertNil(store.object(forKey: "DefaultName.OptionalIntValue"))
-            } else {
-                XCTAssertEqual(store.integer(forKey: "DefaultName.OptionalIntValue"), newValue)
-            }
-        }
-        
-        XCTAssertEqual(optionalIntValues, expectValues)
-    }
-        
-    func testStoreDoublePreferenceValue() {
-        var doubleValues: [Double] = []
-        var expectValues: [Double] = [0.730964920633]
-        
-        cancellable.insert(
-            preferences.$doubleValue.sink {
-                doubleValues.append($0)
-            }
-        )
-        
-        XCTAssertEqual(preferences.doubleValue, 0.730964920633)
-        
-        for _ in 0..<10 {
-            let newValue = Double.random(in: 0...255)
-            expectValues.append(newValue)
-            preferences.doubleValue = newValue
-            XCTAssertEqual(preferences.doubleValue, newValue)
-            XCTAssertEqual(store.double(forKey: "DefaultName.DoubleValue"), newValue)
-        }
-
-        XCTAssertEqual(doubleValues, expectValues)
-    }
-    
-    func testStoreOptionalDoublePreferenceValue() {
-        var optionalDoubleValues: [Double?] = []
-        var expectValues: [Double?] = [nil]
-        
-        cancellable.insert(
-            preferences.$optionalDoubleValue.sink {
-                optionalDoubleValues.append($0)
-            }
-        )
-        
-        XCTAssertNil(preferences.optionalDoubleValue)
-        XCTAssertNil(store.object(forKey: "DefaultName.OptionalDoubleValue"))
-        
-        for _ in 0..<10 {
-            let allowedValues = [nil, Double.random(in: 0...255)]
-            let newValue = allowedValues.randomElement()!
-            expectValues.append(newValue)
-            preferences.optionalDoubleValue = newValue
-            XCTAssertEqual(preferences.optionalDoubleValue, newValue)
-            if newValue == nil {
-                XCTAssertNil(store.object(forKey: "DefaultName.OptionalDoubleValue"))
-            } else {
-                XCTAssertEqual(store.double(forKey: "DefaultName.OptionalDoubleValue"), newValue)
-            }
-        }
-        
-        XCTAssertEqual(optionalDoubleValues, expectValues)
-    }
-        
-    func testStoreFloatPreferenceValue() {
-        var floatValues: [Float] = []
-        var expectValues: [Float] = [1.314]
-        
-        cancellable.insert(
-            preferences.$floatValue.sink {
-                floatValues.append($0)
-            }
-        )
-        
-        XCTAssertEqual(preferences.floatValue, 1.314)
-        
-        for _ in 0..<10 {
-            let newValue = Float.random(in: 0...255)
-            expectValues.append(newValue)
-            preferences.floatValue = newValue
-            XCTAssertEqual(preferences.floatValue, newValue)
-            XCTAssertEqual(store.float(forKey: "DefaultName.FloatValue"), newValue)
-        }
-
-        XCTAssertEqual(floatValues, expectValues)
-    }
-    
-    func testStoreOptionalFloatPreferenceValue() {
-        var optionalFloatValues: [Float?] = []
-        var expectValues: [Float?] = [nil]
-        
-        cancellable.insert(
-            preferences.$optionalFloatValue.sink {
-                optionalFloatValues.append($0)
-            }
-        )
-        
-        XCTAssertNil(preferences.optionalFloatValue)
-        XCTAssertNil(store.object(forKey: "DefaultName.OptionalFloatValue"))
-        
-        for _ in 0..<10 {
-            let allowedValues = [nil, Float.random(in: 0...255)]
-            let newValue = allowedValues.randomElement()!
-            expectValues.append(newValue)
-            preferences.optionalFloatValue = newValue
-            XCTAssertEqual(preferences.optionalFloatValue, newValue)
-            if newValue == nil {
-                XCTAssertNil(store.object(forKey: "DefaultName.OptionalFloatValue"))
-            } else {
-                XCTAssertEqual(store.float(forKey: "DefaultName.OptionalFloatValue"), newValue)
-            }
-        }
-        
-        XCTAssertEqual(optionalFloatValues, expectValues)
-    }
-        
-    func testStoreURLPreferenceValue() {
-        var urlValues: [URL] = []
-        var expectValues: [URL] = [URL(fileURLWithPath: "NOugvfZk")]
-        
-        cancellable.insert(
-            preferences.$urlValue.sink {
-                urlValues.append($0)
-            }
-        )
-        
-        XCTAssertEqual(preferences.urlValue, URL(fileURLWithPath: "NOugvfZk"))
-        
-        for _ in 0..<10 {
-            let newValue = URL(fileURLWithPath: .random())
-            expectValues.append(newValue)
-            preferences.urlValue = newValue
-            XCTAssertEqual(preferences.urlValue, newValue)
-            XCTAssertEqual(store.url(forKey: "DefaultName.URLValue")?.absoluteURL.path, newValue.absoluteURL.path)
-        }
-
-        XCTAssertEqual(urlValues, expectValues)
-    }
-    
-    func testStoreOptionalURLPreferenceValue() {
-        var optionalURLValues: [URL?] = []
-        var expectValues: [URL?] = [nil]
-        
-        cancellable.insert(
-            preferences.$optionalURLValue.sink {
-                optionalURLValues.append($0)
-            }
-        )
-        
-        XCTAssertNil(preferences.optionalURLValue)
-        XCTAssertNil(store.object(forKey: "DefaultName.OptionalURLValue"))
-        
-        for _ in 0..<10 {
-            let allowedValues = [nil, URL(fileURLWithPath: .random())]
-            let newValue = allowedValues.randomElement()!
-            expectValues.append(newValue)
-            preferences.optionalURLValue = newValue
-            XCTAssertEqual(preferences.optionalURLValue, newValue)
-            if newValue == nil {
-                XCTAssertNil(store.object(forKey: "DefaultName.OptionalURLValue"))
-            } else {
-                XCTAssertEqual(store.url(forKey: "DefaultName.OptionalURLValue")?.absoluteURL.path, newValue?.absoluteURL.path)
-            }
-        }
-        
-        XCTAssertEqual(optionalURLValues, expectValues)
-    }
-        
-    func testStoreBoolPreferenceValue() {
+    func testBoolValueReadWritePreference() {
         var boolValues: [Bool] = []
         var expectValues: [Bool] = [true]
         
         cancellable.insert(
-            preferences.$boolValue.sink {
+            preferences.$boolValue.removeDuplicates().sink {
                 boolValues.append($0)
             }
         )
         
         XCTAssertEqual(preferences.boolValue, true)
-        
+
+        var oldValue: Bool = true
+
         for _ in 0..<10 {
             let newValue = Bool.random()
-            expectValues.append(newValue)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
             preferences.boolValue = newValue
+            oldValue = newValue
             XCTAssertEqual(preferences.boolValue, newValue)
-            XCTAssertEqual(store.bool(forKey: "DefaultName.BoolValue"), newValue)
+            XCTAssertEqual(store.bool(forKey: "BoolValue"), newValue)
+        }
+
+        for _ in 0..<10 {
+            let newValue = Bool.random()
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "BoolValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.boolValue, newValue)
+            XCTAssertEqual(store.bool(forKey: "BoolValue"), newValue)
         }
 
         XCTAssertEqual(boolValues, expectValues)
     }
-    
-    func testStoreOptionalBoolPreferenceValue() {
+
+    func testOptionalBoolValueReadWriteWithPreference() {
         var optionalBoolValues: [Bool?] = []
         var expectValues: [Bool?] = [nil]
         
         cancellable.insert(
-            preferences.$optionalBoolValue.sink {
+            preferences.$optionalBoolValue.removeDuplicates().sink {
                 optionalBoolValues.append($0)
             }
         )
         
         XCTAssertNil(preferences.optionalBoolValue)
-        XCTAssertNil(store.object(forKey: "DefaultName.OptionalBoolValue"))
-        
+        XCTAssertNil(store.object(forKey: "OptionalBoolValue"))
+
+        var oldValue: Bool? = nil
+
         for _ in 0..<10 {
             let allowedValues = [nil, Bool.random()]
             let newValue = allowedValues.randomElement()!
-            expectValues.append(newValue)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
             preferences.optionalBoolValue = newValue
+            oldValue = newValue
             XCTAssertEqual(preferences.optionalBoolValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "DefaultName.OptionalBoolValue"))
+                XCTAssertNil(store.object(forKey: "OptionalBoolValue"))
             } else {
-                XCTAssertEqual(store.bool(forKey: "DefaultName.OptionalBoolValue"), newValue)
+                XCTAssertEqual(store.bool(forKey: "OptionalBoolValue"), newValue)
             }
         }
-        
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, Bool.random()]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "OptionalBoolValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalBoolValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalBoolValue"))
+            } else {
+                XCTAssertEqual(store.bool(forKey: "OptionalBoolValue"), newValue)
+            }
+        }
+
         XCTAssertEqual(optionalBoolValues, expectValues)
     }
         
-    func testStoreDataPreferenceValue() {
+    func testIntValueReadWritePreference() {
+        var intValues: [Int] = []
+        var expectValues: [Int] = [5]
+        
+        cancellable.insert(
+            preferences.$intValue.removeDuplicates().sink {
+                intValues.append($0)
+            }
+        )
+        
+        XCTAssertEqual(preferences.intValue, 5)
+
+        var oldValue: Int = 5
+
+        for _ in 0..<10 {
+            let newValue = Int.random(in: 0...255)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.intValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.intValue, newValue)
+            XCTAssertEqual(store.integer(forKey: "IntValue"), newValue)
+        }
+
+        for _ in 0..<10 {
+            let newValue = Int.random(in: 0...255)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "IntValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.intValue, newValue)
+            XCTAssertEqual(store.integer(forKey: "IntValue"), newValue)
+        }
+
+        XCTAssertEqual(intValues, expectValues)
+    }
+
+    func testOptionalIntValueReadWriteWithPreference() {
+        var optionalIntValues: [Int?] = []
+        var expectValues: [Int?] = [nil]
+        
+        cancellable.insert(
+            preferences.$optionalIntValue.removeDuplicates().sink {
+                optionalIntValues.append($0)
+            }
+        )
+        
+        XCTAssertNil(preferences.optionalIntValue)
+        XCTAssertNil(store.object(forKey: "OptionalIntValue"))
+
+        var oldValue: Int? = nil
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, Int.random(in: 0...255)]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.optionalIntValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalIntValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalIntValue"))
+            } else {
+                XCTAssertEqual(store.integer(forKey: "OptionalIntValue"), newValue)
+            }
+        }
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, Int.random(in: 0...255)]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "OptionalIntValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalIntValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalIntValue"))
+            } else {
+                XCTAssertEqual(store.integer(forKey: "OptionalIntValue"), newValue)
+            }
+        }
+
+        XCTAssertEqual(optionalIntValues, expectValues)
+    }
+        
+    func testDoubleValueReadWritePreference() {
+        var doubleValues: [Double] = []
+        var expectValues: [Double] = [0.07033802847862591]
+        
+        cancellable.insert(
+            preferences.$doubleValue.removeDuplicates().sink {
+                doubleValues.append($0)
+            }
+        )
+        
+        XCTAssertEqual(preferences.doubleValue, 0.07033802847862591)
+
+        var oldValue: Double = 0.07033802847862591
+
+        for _ in 0..<10 {
+            let newValue = Double.random(in: 0...255)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.doubleValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.doubleValue, newValue)
+            XCTAssertEqual(store.double(forKey: "DoubleValue"), newValue)
+        }
+
+        for _ in 0..<10 {
+            let newValue = Double.random(in: 0...255)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "DoubleValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.doubleValue, newValue)
+            XCTAssertEqual(store.double(forKey: "DoubleValue"), newValue)
+        }
+
+        XCTAssertEqual(doubleValues, expectValues)
+    }
+
+    func testOptionalDoubleValueReadWriteWithPreference() {
+        var optionalDoubleValues: [Double?] = []
+        var expectValues: [Double?] = [nil]
+        
+        cancellable.insert(
+            preferences.$optionalDoubleValue.removeDuplicates().sink {
+                optionalDoubleValues.append($0)
+            }
+        )
+        
+        XCTAssertNil(preferences.optionalDoubleValue)
+        XCTAssertNil(store.object(forKey: "OptionalDoubleValue"))
+
+        var oldValue: Double? = nil
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, Double.random(in: 0...255)]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.optionalDoubleValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalDoubleValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalDoubleValue"))
+            } else {
+                XCTAssertEqual(store.double(forKey: "OptionalDoubleValue"), newValue)
+            }
+        }
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, Double.random(in: 0...255)]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "OptionalDoubleValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalDoubleValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalDoubleValue"))
+            } else {
+                XCTAssertEqual(store.double(forKey: "OptionalDoubleValue"), newValue)
+            }
+        }
+
+        XCTAssertEqual(optionalDoubleValues, expectValues)
+    }
+        
+    func testFloatValueReadWritePreference() {
+        var floatValues: [Float] = []
+        var expectValues: [Float] = [1.8874]
+        
+        cancellable.insert(
+            preferences.$floatValue.removeDuplicates().sink {
+                floatValues.append($0)
+            }
+        )
+        
+        XCTAssertEqual(preferences.floatValue, 1.8874)
+
+        var oldValue: Float = 1.8874
+
+        for _ in 0..<10 {
+            let newValue = Float.random(in: 0...255)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.floatValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.floatValue, newValue)
+            XCTAssertEqual(store.float(forKey: "FloatValue"), newValue)
+        }
+
+        for _ in 0..<10 {
+            let newValue = Float.random(in: 0...255)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "FloatValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.floatValue, newValue)
+            XCTAssertEqual(store.float(forKey: "FloatValue"), newValue)
+        }
+
+        XCTAssertEqual(floatValues, expectValues)
+    }
+
+    func testOptionalFloatValueReadWriteWithPreference() {
+        var optionalFloatValues: [Float?] = []
+        var expectValues: [Float?] = [nil]
+        
+        cancellable.insert(
+            preferences.$optionalFloatValue.removeDuplicates().sink {
+                optionalFloatValues.append($0)
+            }
+        )
+        
+        XCTAssertNil(preferences.optionalFloatValue)
+        XCTAssertNil(store.object(forKey: "OptionalFloatValue"))
+
+        var oldValue: Float? = nil
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, Float.random(in: 0...255)]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.optionalFloatValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalFloatValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalFloatValue"))
+            } else {
+                XCTAssertEqual(store.float(forKey: "OptionalFloatValue"), newValue)
+            }
+        }
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, Float.random(in: 0...255)]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "OptionalFloatValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalFloatValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalFloatValue"))
+            } else {
+                XCTAssertEqual(store.float(forKey: "OptionalFloatValue"), newValue)
+            }
+        }
+
+        XCTAssertEqual(optionalFloatValues, expectValues)
+    }
+        
+    func testStringValueReadWritePreference() {
+        var stringValues: [String] = []
+        var expectValues: [String] = ["F1FOe4MS"]
+        
+        cancellable.insert(
+            preferences.$stringValue.removeDuplicates().sink {
+                stringValues.append($0)
+            }
+        )
+        
+        XCTAssertEqual(preferences.stringValue, "F1FOe4MS")
+
+        var oldValue: String = "F1FOe4MS"
+
+        for _ in 0..<10 {
+            let newValue = String.random()
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.stringValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.stringValue, newValue)
+            XCTAssertEqual(store.string(forKey: "StringValue"), newValue)
+        }
+
+        for _ in 0..<10 {
+            let newValue = String.random()
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "StringValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.stringValue, newValue)
+            XCTAssertEqual(store.string(forKey: "StringValue"), newValue)
+        }
+
+        XCTAssertEqual(stringValues, expectValues)
+    }
+
+    func testOptionalStringValueReadWriteWithPreference() {
+        var optionalStringValues: [String?] = []
+        var expectValues: [String?] = [nil]
+        
+        cancellable.insert(
+            preferences.$optionalStringValue.removeDuplicates().sink {
+                optionalStringValues.append($0)
+            }
+        )
+        
+        XCTAssertNil(preferences.optionalStringValue)
+        XCTAssertNil(store.object(forKey: "OptionalStringValue"))
+
+        var oldValue: String? = nil
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, String.random()]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.optionalStringValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalStringValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalStringValue"))
+            } else {
+                XCTAssertEqual(store.string(forKey: "OptionalStringValue"), newValue)
+            }
+        }
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, String.random()]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "OptionalStringValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalStringValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalStringValue"))
+            } else {
+                XCTAssertEqual(store.string(forKey: "OptionalStringValue"), newValue)
+            }
+        }
+
+        XCTAssertEqual(optionalStringValues, expectValues)
+    }
+        
+    func testURLValueReadWritePreference() {
+        var urlValues: [URL] = []
+        var expectValues: [URL] = [URL(string: "https://bY2ftCF4.com")!]
+        
+        cancellable.insert(
+            preferences.$urlValue.removeDuplicates().sink {
+                urlValues.append($0)
+            }
+        )
+        
+        XCTAssertEqual(preferences.urlValue, URL(string: "https://bY2ftCF4.com")!)
+
+        var oldValue: URL = URL(string: "https://bY2ftCF4.com")!
+
+        for _ in 0..<10 {
+            let newValue = URL(string: "https://" + .random() + ".com")!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.urlValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.urlValue, newValue)
+            XCTAssertEqual(store.url(forKey: "URLValue")?.absoluteURL.path, newValue.absoluteURL.path)
+        }
+
+        for _ in 0..<10 {
+            let newValue = URL(string: "https://" + .random() + ".com")!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "URLValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.urlValue, newValue)
+            XCTAssertEqual(store.url(forKey: "URLValue")?.absoluteURL.path, newValue.absoluteURL.path)
+        }
+
+        XCTAssertEqual(urlValues, expectValues)
+    }
+
+    func testOptionalURLValueReadWriteWithPreference() {
+        var optionalURLValues: [URL?] = []
+        var expectValues: [URL?] = [nil]
+        
+        cancellable.insert(
+            preferences.$optionalURLValue.removeDuplicates().sink {
+                optionalURLValues.append($0)
+            }
+        )
+        
+        XCTAssertNil(preferences.optionalURLValue)
+        XCTAssertNil(store.object(forKey: "OptionalURLValue"))
+
+        var oldValue: URL? = nil
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, URL(string: "https://" + .random() + ".com")]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.optionalURLValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalURLValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalURLValue"))
+            } else {
+                XCTAssertEqual(store.url(forKey: "OptionalURLValue")?.absoluteURL.path, newValue?.absoluteURL.path)
+            }
+        }
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, URL(string: "https://" + .random() + ".com")]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "OptionalURLValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalURLValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalURLValue"))
+            } else {
+                XCTAssertEqual(store.url(forKey: "OptionalURLValue")?.absoluteURL.path, newValue?.absoluteURL.path)
+            }
+        }
+
+        XCTAssertEqual(optionalURLValues, expectValues)
+    }
+        
+    func testDataValueReadWritePreference() {
         var dataValues: [Data] = []
         var expectValues: [Data] = [.init()]
         
         cancellable.insert(
-            preferences.$dataValue.sink {
+            preferences.$dataValue.removeDuplicates().sink {
                 dataValues.append($0)
             }
         )
         
         XCTAssertEqual(preferences.dataValue, .init())
-        
+
+        var oldValue: Data = .init()
+
         for _ in 0..<10 {
             let newValue = Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max)})
-            expectValues.append(newValue)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
             preferences.dataValue = newValue
+            oldValue = newValue
             XCTAssertEqual(preferences.dataValue, newValue)
-            XCTAssertEqual(store.data(forKey: "DefaultName.DataValue"), newValue)
+            XCTAssertEqual(store.data(forKey: "DataValue"), newValue)
+        }
+
+        for _ in 0..<10 {
+            let newValue = Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max)})
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "DataValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.dataValue, newValue)
+            XCTAssertEqual(store.data(forKey: "DataValue"), newValue)
         }
 
         XCTAssertEqual(dataValues, expectValues)
     }
-    
-    func testStoreOptionalDataPreferenceValue() {
+
+    func testOptionalDataValueReadWriteWithPreference() {
         var optionalDataValues: [Data?] = []
         var expectValues: [Data?] = [nil]
         
         cancellable.insert(
-            preferences.$optionalDataValue.sink {
+            preferences.$optionalDataValue.removeDuplicates().sink {
                 optionalDataValues.append($0)
             }
         )
         
         XCTAssertNil(preferences.optionalDataValue)
-        XCTAssertNil(store.object(forKey: "DefaultName.OptionalDataValue"))
-        
+        XCTAssertNil(store.object(forKey: "OptionalDataValue"))
+
+        var oldValue: Data? = nil
+
         for _ in 0..<10 {
             let allowedValues = [nil, Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max)})]
             let newValue = allowedValues.randomElement()!
-            expectValues.append(newValue)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
             preferences.optionalDataValue = newValue
+            oldValue = newValue
             XCTAssertEqual(preferences.optionalDataValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "DefaultName.OptionalDataValue"))
+                XCTAssertNil(store.object(forKey: "OptionalDataValue"))
             } else {
-                XCTAssertEqual(store.data(forKey: "DefaultName.OptionalDataValue"), newValue)
+                XCTAssertEqual(store.data(forKey: "OptionalDataValue"), newValue)
             }
         }
-        
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max)})]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "OptionalDataValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalDataValue, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "OptionalDataValue"))
+            } else {
+                XCTAssertEqual(store.data(forKey: "OptionalDataValue"), newValue)
+            }
+        }
+
         XCTAssertEqual(optionalDataValues, expectValues)
     }
 }
