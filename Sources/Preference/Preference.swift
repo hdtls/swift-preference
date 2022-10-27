@@ -84,7 +84,7 @@ extension UserDefaults.FieldKey: Sendable {}
     ///   - store: The user defaults store to read and write to. A value
     ///     of `nil` will use the user default store from the environment.
     public init(wrappedValue: Value, _ key: UserDefaults.FieldKey, store: UserDefaults? = nil) {
-        publisher = .init(wrappedValue: wrappedValue, key.rawValue, store: store)
+        publisher = .init(wrappedValue: wrappedValue, key, store: store)
     }
     
     public var wrappedValue: Value {
@@ -117,7 +117,7 @@ extension Preference where Value: ExpressibleByNilLiteral {
     ///   - store: The user defaults store to read and write to. A value
     ///     of `nil` will use the user default store from the environment.
     public init<O>(_ key: UserDefaults.FieldKey, store: UserDefaults? = nil) where Value == O? {
-        publisher = .init(key.rawValue, store: store)
+        publisher = .init(key, store: store)
     }
 }
 
@@ -138,7 +138,6 @@ extension Preference {
         public var value: Value {
             get { subject.value }
             set {
-                subject.value = newValue
                 store.set(newValue.preferenceValue, forKey: key)
             }
         }
