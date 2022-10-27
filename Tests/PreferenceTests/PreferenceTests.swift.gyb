@@ -58,7 +58,7 @@ preference_testable_defines = {
     },
     "URL": {
         "selector": "url",
-        "initialValue": 'URL(fileURLWithPath: "{}")'.format(''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(8)))
+        "initialValue": 'URL(string: "https://{}.com")!'.format(''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(8)))
     },
     "Data": {
         "selector": "data",
@@ -74,14 +74,21 @@ extension String {
     }
 }
 
-let store: UserDefaults = .init(suiteName: UUID().uuidString)!
+let store: UserDefaults = .init(suiteName: "swift-preference/\(UUID().uuidString)")!
+
+extension UserDefaults.FieldKey {
+    %for define in preference_testable_defines.keys():
+    static let ${define.lower()}Value: UserDefaults.FieldKey = "${define}Value"
+    static let optional${define}Value: UserDefaults.FieldKey = "Optional${define}Value"
+    %end
+}
 
 class PreferenceTests: XCTestCase {
 
     struct Preferences {
         %for define in preference_testable_defines.keys():
-        @Preference("DefaultName.${define}Value", store: store) var ${define.lower()}Value: ${define} = ${preference_testable_defines[define]["initialValue"]}
-        @Preference("DefaultName.Optional${define}Value", store: store) var optional${define}Value: ${define}?
+        @Preference(.${define.lower()}Value, store: store) var ${define.lower()}Value: ${define} = ${preference_testable_defines[define]["initialValue"]}
+        @Preference(.optional${define}Value, store: store) var optional${define}Value: ${define}?
         %end
     }
 
@@ -95,43 +102,67 @@ class PreferenceTests: XCTestCase {
     }
     %for define in preference_testable_defines.keys():
         
-    func testStore${define}PreferenceValue() {
+    func test${define}ValueReadWritePreference() {
         var ${define.lower()}Values: [${define}] = []
         var expectValues: [${define}] = [${preference_testable_defines[define]["initialValue"]}]
         
         cancellable.insert(
-            preferences.$$${define.lower()}Value.sink {
+            preferences.$$${define.lower()}Value.removeDuplicates().sink {
                 ${define.lower()}Values.append($0)
             }
         )
         
         XCTAssertEqual(preferences.${define.lower()}Value, ${preference_testable_defines[define]["initialValue"]})
-        
-        for _ in 0..<10 {
-            %{
-            if define == "Bool":
+
+        var oldValue: ${define} = ${preference_testable_defines[define]["initialValue"]}
+
+        %{
+        if define == "Bool":
+            val = define + ".random()"
+        elif define in ["Int", "Double", "Float"]:
+            val = define + ".random(in: 0...255)"
+        elif define == "String":
                 val = define + ".random()"
-            elif define in ["Int", "Double", "Float"]:
-                val = define + ".random(in: 0...255)"
-            elif define == "String":
-                    val = define + ".random()"
-            elif define == "URL":
-                    val = "URL(fileURLWithPath: .random())"
-            elif define == "Data":
-                val = "Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max)})"
-            else:
-                val = "nil"
-            }%
+        elif define == "URL":
+                val = "URL(string: \"https://\" + .random() + \".com\")!"
+        elif define == "Data":
+            val = "Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max)})"
+        else:
+            val = "nil"
+        }%
+        for _ in 0..<10 {
             let newValue = ${val}
-            expectValues.append(newValue)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
             preferences.${define.lower()}Value = newValue
+            oldValue = newValue
             XCTAssertEqual(preferences.${define.lower()}Value, newValue)
             %{
             if define == "URL":
-                lhs = 'store.{}(forKey: "DefaultName.{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
+                lhs = 'store.{}(forKey: "{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
                 rhs = "newValue.absoluteURL.path"
             else:
-                lhs = 'store.{}(forKey: "DefaultName.{}Value")'.format(preference_testable_defines[define]["selector"], define)
+                lhs = 'store.{}(forKey: "{}Value")'.format(preference_testable_defines[define]["selector"], define)
+                rhs = "newValue"
+            }%
+            XCTAssertEqual(${lhs}, ${rhs})
+        }
+
+        for _ in 0..<10 {
+            let newValue = ${val}
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "${define}Value")
+            oldValue = newValue
+            XCTAssertEqual(preferences.${define.lower()}Value, newValue)
+            %{
+            if define == "URL":
+                lhs = 'store.{}(forKey: "{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
+                rhs = "newValue.absoluteURL.path"
+            else:
+                lhs = 'store.{}(forKey: "{}Value")'.format(preference_testable_defines[define]["selector"], define)
                 rhs = "newValue"
             }%
             XCTAssertEqual(${lhs}, ${rhs})
@@ -139,55 +170,84 @@ class PreferenceTests: XCTestCase {
 
         XCTAssertEqual(${define.lower()}Values, expectValues)
     }
-    
-    func testStoreOptional${define}PreferenceValue() {
+
+    func testOptional${define}ValueReadWriteWithPreference() {
         var optional${define}Values: [${define}?] = []
         var expectValues: [${define}?] = [nil]
         
         cancellable.insert(
-            preferences.$optional${define}Value.sink {
+            preferences.$optional${define}Value.removeDuplicates().sink {
                 optional${define}Values.append($0)
             }
         )
         
         XCTAssertNil(preferences.optional${define}Value)
-        XCTAssertNil(store.object(forKey: "DefaultName.Optional${define}Value"))
-        
+        XCTAssertNil(store.object(forKey: "Optional${define}Value"))
+
+        var oldValue: ${define}? = nil
+
+        %{
+        if define == "Bool":
+            val = define + ".random()"
+        elif define in ["Int", "Double", "Float"]:
+            val = define + ".random(in: 0...255)"
+        elif define == "String":
+            val = define + ".random()"
+        elif define == "URL":
+            val = "URL(string: \"https://\" + .random() + \".com\")"
+        elif define == "Data":
+            val = "Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max)})"
+        else:
+            val = "nil"
+        }%
         for _ in 0..<10 {
-            %{
-            if define == "Bool":
-                val = define + ".random()"
-            elif define in ["Int", "Double", "Float"]:
-                val = define + ".random(in: 0...255)"
-            elif define == "String":
-                val = define + ".random()"
-            elif define == "URL":
-                val = "URL(fileURLWithPath: .random())"
-            elif define == "Data":
-                val = "Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max)})"
-            else:
-                val = "nil"
-            }%
             let allowedValues = [nil, ${val}]
             let newValue = allowedValues.randomElement()!
-            expectValues.append(newValue)
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
             preferences.optional${define}Value = newValue
+            oldValue = newValue
             XCTAssertEqual(preferences.optional${define}Value, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "DefaultName.Optional${define}Value"))
+                XCTAssertNil(store.object(forKey: "Optional${define}Value"))
             } else {
                 %{
                 if define == "URL":
-                    lhs = 'store.{}(forKey: "DefaultName.Optional{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
+                    lhs = 'store.{}(forKey: "Optional{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
                     rhs = "newValue?.absoluteURL.path"
                 else:
-                    lhs = 'store.{}(forKey: "DefaultName.Optional{}Value")'.format(preference_testable_defines[define]["selector"], define)
+                    lhs = 'store.{}(forKey: "Optional{}Value")'.format(preference_testable_defines[define]["selector"], define)
                     rhs = "newValue"
                 }%
                 XCTAssertEqual(${lhs}, ${rhs})
             }
         }
-        
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, ${val}]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "Optional${define}Value")
+            oldValue = newValue
+            XCTAssertEqual(preferences.optional${define}Value, newValue)
+            if newValue == nil {
+                XCTAssertNil(store.object(forKey: "Optional${define}Value"))
+            } else {
+                %{
+                if define == "URL":
+                    lhs = 'store.{}(forKey: "Optional{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
+                    rhs = "newValue?.absoluteURL.path"
+                else:
+                    lhs = 'store.{}(forKey: "Optional{}Value")'.format(preference_testable_defines[define]["selector"], define)
+                    rhs = "newValue"
+                }%
+                XCTAssertEqual(${lhs}, ${rhs})
+            }
+        }
+
         XCTAssertEqual(optional${define}Values, expectValues)
     }
     %end
