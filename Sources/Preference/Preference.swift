@@ -89,7 +89,7 @@ extension UserDefaults.FieldKey: Sendable {}
     
     public var wrappedValue: Value {
         get { publisher.value }
-        nonmutating set { publisher.value = newValue }
+        set { publisher.value = newValue }
     }
     
     public var projectedValue: Publisher { publisher }
@@ -257,8 +257,44 @@ extension Preference {
                 self.subject.value = wrappedValue
                 return
             }
-            
-            self.subject.value = Value(preferenceValue: object) ?? wrappedValue
+
+          // Remove duplicated elements
+          switch Value.self {
+          case is Bool.Type:
+              if self.subject.value as? Bool != (Value(preferenceValue: object) ?? wrappedValue) as? Bool {
+                self.subject.value = Value(preferenceValue: object) ?? wrappedValue
+              }
+          case is Int.Type:
+              if self.subject.value as? Int != (Value(preferenceValue: object) ?? wrappedValue) as? Int {
+                  self.subject.value = Value(preferenceValue: object) ?? wrappedValue
+              }
+          case is Double.Type:
+              if self.subject.value as? Double != (Value(preferenceValue: object) ?? wrappedValue) as? Double {
+                  self.subject.value = Value(preferenceValue: object) ?? wrappedValue
+              }
+          case is Float.Type:
+              if self.subject.value as? Float != (Value(preferenceValue: object) ?? wrappedValue) as? Float {
+                  self.subject.value = Value(preferenceValue: object) ?? wrappedValue
+              }
+          case is String.Type:
+              if self.subject.value as? String != (Value(preferenceValue: object) ?? wrappedValue) as? String {
+                  self.subject.value = Value(preferenceValue: object) ?? wrappedValue
+              }
+          case is URL.Type:
+              if self.subject.value as? URL != (Value(preferenceValue: object) ?? wrappedValue) as? URL {
+                  self.subject.value = Value(preferenceValue: object) ?? wrappedValue
+              }
+          case is Data.Type:
+              if self.subject.value as? Data != (Value(preferenceValue: object) ?? wrappedValue) as? Data {
+                  self.subject.value = Value(preferenceValue: object) ?? wrappedValue
+              }
+          case is Date.Type:
+              if self.subject.value as? Date != (Value(preferenceValue: object) ?? wrappedValue) as? Date {
+                  self.subject.value = Value(preferenceValue: object) ?? wrappedValue
+              }
+          default:
+              self.subject.value = Value(preferenceValue: object) ?? wrappedValue
+          }
         }
         
         public func receive<S>(

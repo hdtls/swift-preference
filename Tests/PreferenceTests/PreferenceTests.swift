@@ -65,15 +65,15 @@ class PreferenceTests: XCTestCase {
     struct Preferences {
         @Preference(.boolValue, store: store) var boolValue: Bool = true
         @Preference(.optionalBoolValue, store: store) var optionalBoolValue: Bool?
-        @Preference(.intValue, store: store) var intValue: Int = 4
+        @Preference(.intValue, store: store) var intValue: Int = 6
         @Preference(.optionalIntValue, store: store) var optionalIntValue: Int?
-        @Preference(.doubleValue, store: store) var doubleValue: Double = 0.5848242166283172
+        @Preference(.doubleValue, store: store) var doubleValue: Double = 0.3696425026694161
         @Preference(.optionalDoubleValue, store: store) var optionalDoubleValue: Double?
-        @Preference(.floatValue, store: store) var floatValue: Float = 1.4839
+        @Preference(.floatValue, store: store) var floatValue: Float = 1.4382
         @Preference(.optionalFloatValue, store: store) var optionalFloatValue: Float?
-        @Preference(.stringValue, store: store) var stringValue: String = "aZ2zRcbF"
+        @Preference(.stringValue, store: store) var stringValue: String = "pyNi8eZw"
         @Preference(.optionalStringValue, store: store) var optionalStringValue: String?
-        @Preference(.urlValue, store: store) var urlValue: URL = URL(string: "https://Zq6RmKFz.com")!
+        @Preference(.urlValue, store: store) var urlValue: URL = URL(string: "https://lVNmIBX8.com")!
         @Preference(.optionalURLValue, store: store) var optionalURLValue: URL?
         @Preference(.dataValue, store: store) var dataValue: Data = .init()
         @Preference(.optionalDataValue, store: store) var optionalDataValue: Data?
@@ -90,12 +90,12 @@ class PreferenceTests: XCTestCase {
         cancellable.removeAll()
     }
         
-    func testBoolValueReadWritePreference() {
+    func testReadWriteBoolValueWithPreference() {
         var boolValues: [Bool] = []
         var expectValues: [Bool] = [true]
         
         cancellable.insert(
-            preferences.$boolValue.removeDuplicates().sink {
+            preferences.$boolValue.sink {
                 boolValues.append($0)
             }
         )
@@ -129,12 +129,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(boolValues, expectValues)
     }
 
-    func testOptionalBoolValueReadWriteWithPreference() {
+    func testReadWriteOptionalBoolValueWithPreference() {
         var optionalBoolValues: [Bool?] = []
         var expectValues: [Bool?] = [nil]
         
         cancellable.insert(
-            preferences.$optionalBoolValue.removeDuplicates().sink {
+            preferences.$optionalBoolValue.sink {
                 optionalBoolValues.append($0)
             }
         )
@@ -179,19 +179,19 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(optionalBoolValues, expectValues)
     }
         
-    func testIntValueReadWritePreference() {
+    func testReadWriteIntValueWithPreference() {
         var intValues: [Int] = []
-        var expectValues: [Int] = [4]
+        var expectValues: [Int] = [6]
         
         cancellable.insert(
-            preferences.$intValue.removeDuplicates().sink {
+            preferences.$intValue.sink {
                 intValues.append($0)
             }
         )
         
-        XCTAssertEqual(preferences.intValue, 4)
+        XCTAssertEqual(preferences.intValue, 6)
 
-        var oldValue: Int = 4
+        var oldValue: Int = 6
 
         for _ in 0..<10 {
             let newValue = Int.random(in: 0...255)
@@ -218,12 +218,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(intValues, expectValues)
     }
 
-    func testOptionalIntValueReadWriteWithPreference() {
+    func testReadWriteOptionalIntValueWithPreference() {
         var optionalIntValues: [Int?] = []
         var expectValues: [Int?] = [nil]
         
         cancellable.insert(
-            preferences.$optionalIntValue.removeDuplicates().sink {
+            preferences.$optionalIntValue.sink {
                 optionalIntValues.append($0)
             }
         )
@@ -268,19 +268,19 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(optionalIntValues, expectValues)
     }
         
-    func testDoubleValueReadWritePreference() {
+    func testReadWriteDoubleValueWithPreference() {
         var doubleValues: [Double] = []
-        var expectValues: [Double] = [0.5848242166283172]
+        var expectValues: [Double] = [0.3696425026694161]
         
         cancellable.insert(
-            preferences.$doubleValue.removeDuplicates().sink {
+            preferences.$doubleValue.sink {
                 doubleValues.append($0)
             }
         )
         
-        XCTAssertEqual(preferences.doubleValue, 0.5848242166283172)
+        XCTAssertEqual(preferences.doubleValue, 0.3696425026694161)
 
-        var oldValue: Double = 0.5848242166283172
+        var oldValue: Double = 0.3696425026694161
 
         for _ in 0..<10 {
             let newValue = Double.random(in: 0...255)
@@ -307,12 +307,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(doubleValues, expectValues)
     }
 
-    func testOptionalDoubleValueReadWriteWithPreference() {
+    func testReadWriteOptionalDoubleValueWithPreference() {
         var optionalDoubleValues: [Double?] = []
         var expectValues: [Double?] = [nil]
         
         cancellable.insert(
-            preferences.$optionalDoubleValue.removeDuplicates().sink {
+            preferences.$optionalDoubleValue.sink {
                 optionalDoubleValues.append($0)
             }
         )
@@ -357,19 +357,19 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(optionalDoubleValues, expectValues)
     }
         
-    func testFloatValueReadWritePreference() {
+    func testReadWriteFloatValueWithPreference() {
         var floatValues: [Float] = []
-        var expectValues: [Float] = [1.4839]
+        var expectValues: [Float] = [1.4382]
         
         cancellable.insert(
-            preferences.$floatValue.removeDuplicates().sink {
+            preferences.$floatValue.sink {
                 floatValues.append($0)
             }
         )
         
-        XCTAssertEqual(preferences.floatValue, 1.4839)
+        XCTAssertEqual(preferences.floatValue, 1.4382)
 
-        var oldValue: Float = 1.4839
+        var oldValue: Float = 1.4382
 
         for _ in 0..<10 {
             let newValue = Float.random(in: 0...255)
@@ -396,12 +396,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(floatValues, expectValues)
     }
 
-    func testOptionalFloatValueReadWriteWithPreference() {
+    func testReadWriteOptionalFloatValueWithPreference() {
         var optionalFloatValues: [Float?] = []
         var expectValues: [Float?] = [nil]
         
         cancellable.insert(
-            preferences.$optionalFloatValue.removeDuplicates().sink {
+            preferences.$optionalFloatValue.sink {
                 optionalFloatValues.append($0)
             }
         )
@@ -446,19 +446,19 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(optionalFloatValues, expectValues)
     }
         
-    func testStringValueReadWritePreference() {
+    func testReadWriteStringValueWithPreference() {
         var stringValues: [String] = []
-        var expectValues: [String] = ["aZ2zRcbF"]
+        var expectValues: [String] = ["pyNi8eZw"]
         
         cancellable.insert(
-            preferences.$stringValue.removeDuplicates().sink {
+            preferences.$stringValue.sink {
                 stringValues.append($0)
             }
         )
         
-        XCTAssertEqual(preferences.stringValue, "aZ2zRcbF")
+        XCTAssertEqual(preferences.stringValue, "pyNi8eZw")
 
-        var oldValue: String = "aZ2zRcbF"
+        var oldValue: String = "pyNi8eZw"
 
         for _ in 0..<10 {
             let newValue = String.random()
@@ -485,12 +485,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(stringValues, expectValues)
     }
 
-    func testOptionalStringValueReadWriteWithPreference() {
+    func testReadWriteOptionalStringValueWithPreference() {
         var optionalStringValues: [String?] = []
         var expectValues: [String?] = [nil]
         
         cancellable.insert(
-            preferences.$optionalStringValue.removeDuplicates().sink {
+            preferences.$optionalStringValue.sink {
                 optionalStringValues.append($0)
             }
         )
@@ -535,19 +535,19 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(optionalStringValues, expectValues)
     }
         
-    func testURLValueReadWritePreference() {
+    func testReadWriteURLValueWithPreference() {
         var urlValues: [URL] = []
-        var expectValues: [URL] = [URL(string: "https://Zq6RmKFz.com")!]
+        var expectValues: [URL] = [URL(string: "https://lVNmIBX8.com")!]
         
         cancellable.insert(
-            preferences.$urlValue.removeDuplicates().sink {
+            preferences.$urlValue.sink {
                 urlValues.append($0)
             }
         )
         
-        XCTAssertEqual(preferences.urlValue, URL(string: "https://Zq6RmKFz.com")!)
+        XCTAssertEqual(preferences.urlValue, URL(string: "https://lVNmIBX8.com")!)
 
-        var oldValue: URL = URL(string: "https://Zq6RmKFz.com")!
+        var oldValue: URL = URL(string: "https://lVNmIBX8.com")!
 
         for _ in 0..<10 {
             let newValue = URL(string: "https://" + .random() + ".com")!
@@ -574,12 +574,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(urlValues, expectValues)
     }
 
-    func testOptionalURLValueReadWriteWithPreference() {
+    func testReadWriteOptionalURLValueWithPreference() {
         var optionalURLValues: [URL?] = []
         var expectValues: [URL?] = [nil]
         
         cancellable.insert(
-            preferences.$optionalURLValue.removeDuplicates().sink {
+            preferences.$optionalURLValue.sink {
                 optionalURLValues.append($0)
             }
         )
@@ -624,12 +624,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(optionalURLValues, expectValues)
     }
         
-    func testDataValueReadWritePreference() {
+    func testReadWriteDataValueWithPreference() {
         var dataValues: [Data] = []
         var expectValues: [Data] = [.init()]
         
         cancellable.insert(
-            preferences.$dataValue.removeDuplicates().sink {
+            preferences.$dataValue.sink {
                 dataValues.append($0)
             }
         )
@@ -663,12 +663,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(dataValues, expectValues)
     }
 
-    func testOptionalDataValueReadWriteWithPreference() {
+    func testReadWriteOptionalDataValueWithPreference() {
         var optionalDataValues: [Data?] = []
         var expectValues: [Data?] = [nil]
         
         cancellable.insert(
-            preferences.$optionalDataValue.removeDuplicates().sink {
+            preferences.$optionalDataValue.sink {
                 optionalDataValues.append($0)
             }
         )
@@ -713,12 +713,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(optionalDataValues, expectValues)
     }
         
-    func testDateValueReadWritePreference() {
+    func testReadWriteDateValueWithPreference() {
         var dateValues: [Date] = []
         var expectValues: [Date] = [.distantPast]
         
         cancellable.insert(
-            preferences.$dateValue.removeDuplicates().sink {
+            preferences.$dateValue.sink {
                 dateValues.append($0)
             }
         )
@@ -752,12 +752,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(dateValues, expectValues)
     }
 
-    func testOptionalDateValueReadWriteWithPreference() {
+    func testReadWriteOptionalDateValueWithPreference() {
         var optionalDateValues: [Date?] = []
         var expectValues: [Date?] = [nil]
         
         cancellable.insert(
-            preferences.$optionalDateValue.removeDuplicates().sink {
+            preferences.$optionalDateValue.sink {
                 optionalDateValues.append($0)
             }
         )

@@ -106,12 +106,12 @@ class PreferenceTests: XCTestCase {
     }
     %for define in preference_testable_defines.keys():
         
-    func test${define}ValueReadWritePreference() {
+    func testReadWrite${define}ValueWithPreference() {
         var ${define.lower()}Values: [${define}] = []
         var expectValues: [${define}] = [${preference_testable_defines[define]["initialValue"]}]
         
         cancellable.insert(
-            preferences.$$${define.lower()}Value.removeDuplicates().sink {
+            preferences.$$${define.lower()}Value.sink {
                 ${define.lower()}Values.append($0)
             }
         )
@@ -172,12 +172,12 @@ class PreferenceTests: XCTestCase {
         XCTAssertEqual(${define.lower()}Values, expectValues)
     }
 
-    func testOptional${define}ValueReadWriteWithPreference() {
+    func testReadWriteOptional${define}ValueWithPreference() {
         var optional${define}Values: [${define}?] = []
         var expectValues: [${define}?] = [nil]
         
         cancellable.insert(
-            preferences.$optional${define}Value.removeDuplicates().sink {
+            preferences.$optional${define}Value.sink {
                 optional${define}Values.append($0)
             }
         )
