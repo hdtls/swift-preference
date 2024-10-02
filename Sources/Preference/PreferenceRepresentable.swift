@@ -179,6 +179,19 @@ extension Data: PreferenceRepresentable {
     }
 }
 
+extension Date: PreferenceRepresentable {
+    public init?(preferenceValue: Any) {
+        guard let val = preferenceValue as? Date else {
+            return nil
+        }
+        self = val
+    }
+
+    public var preferenceValue: Any? {
+        self
+    }
+}
+
 extension Array: PreferenceRepresentable where Element: PreferenceRepresentable {
     
     public init?(preferenceValue: Any) {

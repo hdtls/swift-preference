@@ -271,8 +271,8 @@ extension Preference {
 
 #if swift(>=5.5) && canImport(_Concurrency)
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-extension Preference: Sendable where Value: Sendable {}
+extension Preference: @unchecked Sendable where Value: Sendable {}
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-extension Preference.Publisher: Sendable where Value: Sendable {}
+extension Preference.Publisher: @unchecked Sendable where Value: Sendable {}
 #endif

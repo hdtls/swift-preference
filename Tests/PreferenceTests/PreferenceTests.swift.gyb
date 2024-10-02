@@ -63,6 +63,10 @@ preference_testable_defines = {
     "Data": {
         "selector": "data",
         "initialValue": ".init()"
+    },
+    "Date": {
+        "selector": "object",
+        "initialValue": ".distantPast"
     }
 }
 }%
@@ -122,13 +126,26 @@ class PreferenceTests: XCTestCase {
         elif define in ["Int", "Double", "Float"]:
             val = define + ".random(in: 0...255)"
         elif define == "String":
-                val = define + ".random()"
+            val = define + ".random()"
         elif define == "URL":
-                val = "URL(string: \"https://\" + .random() + \".com\")!"
+            val = "URL(string: \"https://\" + .random() + \".com\")!"
         elif define == "Data":
             val = "Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max)})"
+        elif define == "Date":
+            val = "Date.distantPast"
         else:
             val = "nil"
+        }%
+        %{
+        if define == "URL":
+            lhs = 'store.{}(forKey: "{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
+            rhs = "newValue.absoluteURL.path"
+        elif define == "Date":
+            lhs = 'store.{}(forKey: "{}Value") as? Date'.format(preference_testable_defines[define]["selector"], define)
+            rhs = "newValue"
+        else:
+            lhs = 'store.{}(forKey: "{}Value")'.format(preference_testable_defines[define]["selector"], define)
+            rhs = "newValue"
         }%
         for _ in 0..<10 {
             let newValue = ${val}
@@ -138,14 +155,6 @@ class PreferenceTests: XCTestCase {
             preferences.${define.lower()}Value = newValue
             oldValue = newValue
             XCTAssertEqual(preferences.${define.lower()}Value, newValue)
-            %{
-            if define == "URL":
-                lhs = 'store.{}(forKey: "{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
-                rhs = "newValue.absoluteURL.path"
-            else:
-                lhs = 'store.{}(forKey: "{}Value")'.format(preference_testable_defines[define]["selector"], define)
-                rhs = "newValue"
-            }%
             XCTAssertEqual(${lhs}, ${rhs})
         }
 
@@ -157,14 +166,6 @@ class PreferenceTests: XCTestCase {
             store.set(newValue, forKey: "${define}Value")
             oldValue = newValue
             XCTAssertEqual(preferences.${define.lower()}Value, newValue)
-            %{
-            if define == "URL":
-                lhs = 'store.{}(forKey: "{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
-                rhs = "newValue.absoluteURL.path"
-            else:
-                lhs = 'store.{}(forKey: "{}Value")'.format(preference_testable_defines[define]["selector"], define)
-                rhs = "newValue"
-            }%
             XCTAssertEqual(${lhs}, ${rhs})
         }
 
@@ -197,6 +198,8 @@ class PreferenceTests: XCTestCase {
             val = "URL(string: \"https://\" + .random() + \".com\")"
         elif define == "Data":
             val = "Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max)})"
+        elif define == "Date":
+            val = "Date.distantPast"
         else:
             val = "nil"
         }%
@@ -210,15 +213,28 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optional${define}Value, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "Optional${define}Value"))
-            } else {
                 %{
-                if define == "URL":
-                    lhs = 'store.{}(forKey: "Optional{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
-                    rhs = "newValue?.absoluteURL.path"
+                if define == "Date":
+                    lhs = 'store.{}(forKey: "Optional{}Value") as? Date'.format(preference_testable_defines[define]["selector"], define)
                 else:
                     lhs = 'store.{}(forKey: "Optional{}Value")'.format(preference_testable_defines[define]["selector"], define)
-                    rhs = "newValue"
+                if define == "Bool":
+                    rhs = "false"
+                elif define == "Int":
+                    rhs = "0"
+                elif define in ["Double", "Float"]:
+                    rhs = "0.0"
+                else:
+                    rhs = "nil"
+                }%
+                XCTAssertEqual(${lhs}, ${rhs})
+            } else {
+                %{
+                rhs = "newValue"
+                if define == "Date":
+                    lhs = 'store.{}(forKey: "Optional{}Value") as? Date'.format(preference_testable_defines[define]["selector"], define)
+                else:
+                    lhs = 'store.{}(forKey: "Optional{}Value")'.format(preference_testable_defines[define]["selector"], define)
                 }%
                 XCTAssertEqual(${lhs}, ${rhs})
             }
@@ -234,15 +250,28 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optional${define}Value, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "Optional${define}Value"))
-            } else {
                 %{
-                if define == "URL":
-                    lhs = 'store.{}(forKey: "Optional{}Value")?.absoluteURL.path'.format(preference_testable_defines[define]["selector"], define)
-                    rhs = "newValue?.absoluteURL.path"
+                if define == "Date":
+                    lhs = 'store.{}(forKey: "Optional{}Value") as? Date'.format(preference_testable_defines[define]["selector"], define)
                 else:
                     lhs = 'store.{}(forKey: "Optional{}Value")'.format(preference_testable_defines[define]["selector"], define)
-                    rhs = "newValue"
+                if define == "Bool":
+                    rhs = "false"
+                elif define == "Int":
+                    rhs = "0"
+                elif define in ["Double", "Float"]:
+                    rhs = "0.0"
+                else:
+                    rhs = "nil"
+                }%
+                XCTAssertEqual(${lhs}, ${rhs})
+            } else {
+                %{
+                rhs = "newValue"
+                if define == "Date":
+                    lhs = 'store.{}(forKey: "Optional{}Value") as? Date'.format(preference_testable_defines[define]["selector"], define)
+                else:
+                    lhs = 'store.{}(forKey: "Optional{}Value")'.format(preference_testable_defines[define]["selector"], define)
                 }%
                 XCTAssertEqual(${lhs}, ${rhs})
             }

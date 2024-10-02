@@ -56,6 +56,8 @@ extension UserDefaults.FieldKey {
     static let optionalURLValue: UserDefaults.FieldKey = "OptionalURLValue"
     static let dataValue: UserDefaults.FieldKey = "DataValue"
     static let optionalDataValue: UserDefaults.FieldKey = "OptionalDataValue"
+    static let dateValue: UserDefaults.FieldKey = "DateValue"
+    static let optionalDateValue: UserDefaults.FieldKey = "OptionalDateValue"
 }
 
 class PreferenceTests: XCTestCase {
@@ -63,18 +65,20 @@ class PreferenceTests: XCTestCase {
     struct Preferences {
         @Preference(.boolValue, store: store) var boolValue: Bool = true
         @Preference(.optionalBoolValue, store: store) var optionalBoolValue: Bool?
-        @Preference(.intValue, store: store) var intValue: Int = 5
+        @Preference(.intValue, store: store) var intValue: Int = 4
         @Preference(.optionalIntValue, store: store) var optionalIntValue: Int?
-        @Preference(.doubleValue, store: store) var doubleValue: Double = 0.07033802847862591
+        @Preference(.doubleValue, store: store) var doubleValue: Double = 0.5848242166283172
         @Preference(.optionalDoubleValue, store: store) var optionalDoubleValue: Double?
-        @Preference(.floatValue, store: store) var floatValue: Float = 1.8874
+        @Preference(.floatValue, store: store) var floatValue: Float = 1.4839
         @Preference(.optionalFloatValue, store: store) var optionalFloatValue: Float?
-        @Preference(.stringValue, store: store) var stringValue: String = "F1FOe4MS"
+        @Preference(.stringValue, store: store) var stringValue: String = "aZ2zRcbF"
         @Preference(.optionalStringValue, store: store) var optionalStringValue: String?
-        @Preference(.urlValue, store: store) var urlValue: URL = URL(string: "https://bY2ftCF4.com")!
+        @Preference(.urlValue, store: store) var urlValue: URL = URL(string: "https://Zq6RmKFz.com")!
         @Preference(.optionalURLValue, store: store) var optionalURLValue: URL?
         @Preference(.dataValue, store: store) var dataValue: Data = .init()
         @Preference(.optionalDataValue, store: store) var optionalDataValue: Data?
+        @Preference(.dateValue, store: store) var dateValue: Date = .distantPast
+        @Preference(.optionalDateValue, store: store) var optionalDateValue: Date?
     }
 
     var preferences: Preferences = .init()
@@ -150,7 +154,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalBoolValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalBoolValue"))
+                XCTAssertEqual(store.bool(forKey: "OptionalBoolValue"), false)
             } else {
                 XCTAssertEqual(store.bool(forKey: "OptionalBoolValue"), newValue)
             }
@@ -166,7 +170,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalBoolValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalBoolValue"))
+                XCTAssertEqual(store.bool(forKey: "OptionalBoolValue"), false)
             } else {
                 XCTAssertEqual(store.bool(forKey: "OptionalBoolValue"), newValue)
             }
@@ -177,7 +181,7 @@ class PreferenceTests: XCTestCase {
         
     func testIntValueReadWritePreference() {
         var intValues: [Int] = []
-        var expectValues: [Int] = [5]
+        var expectValues: [Int] = [4]
         
         cancellable.insert(
             preferences.$intValue.removeDuplicates().sink {
@@ -185,9 +189,9 @@ class PreferenceTests: XCTestCase {
             }
         )
         
-        XCTAssertEqual(preferences.intValue, 5)
+        XCTAssertEqual(preferences.intValue, 4)
 
-        var oldValue: Int = 5
+        var oldValue: Int = 4
 
         for _ in 0..<10 {
             let newValue = Int.random(in: 0...255)
@@ -239,7 +243,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalIntValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalIntValue"))
+                XCTAssertEqual(store.integer(forKey: "OptionalIntValue"), 0)
             } else {
                 XCTAssertEqual(store.integer(forKey: "OptionalIntValue"), newValue)
             }
@@ -255,7 +259,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalIntValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalIntValue"))
+                XCTAssertEqual(store.integer(forKey: "OptionalIntValue"), 0)
             } else {
                 XCTAssertEqual(store.integer(forKey: "OptionalIntValue"), newValue)
             }
@@ -266,7 +270,7 @@ class PreferenceTests: XCTestCase {
         
     func testDoubleValueReadWritePreference() {
         var doubleValues: [Double] = []
-        var expectValues: [Double] = [0.07033802847862591]
+        var expectValues: [Double] = [0.5848242166283172]
         
         cancellable.insert(
             preferences.$doubleValue.removeDuplicates().sink {
@@ -274,9 +278,9 @@ class PreferenceTests: XCTestCase {
             }
         )
         
-        XCTAssertEqual(preferences.doubleValue, 0.07033802847862591)
+        XCTAssertEqual(preferences.doubleValue, 0.5848242166283172)
 
-        var oldValue: Double = 0.07033802847862591
+        var oldValue: Double = 0.5848242166283172
 
         for _ in 0..<10 {
             let newValue = Double.random(in: 0...255)
@@ -328,7 +332,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalDoubleValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalDoubleValue"))
+                XCTAssertEqual(store.double(forKey: "OptionalDoubleValue"), 0.0)
             } else {
                 XCTAssertEqual(store.double(forKey: "OptionalDoubleValue"), newValue)
             }
@@ -344,7 +348,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalDoubleValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalDoubleValue"))
+                XCTAssertEqual(store.double(forKey: "OptionalDoubleValue"), 0.0)
             } else {
                 XCTAssertEqual(store.double(forKey: "OptionalDoubleValue"), newValue)
             }
@@ -355,7 +359,7 @@ class PreferenceTests: XCTestCase {
         
     func testFloatValueReadWritePreference() {
         var floatValues: [Float] = []
-        var expectValues: [Float] = [1.8874]
+        var expectValues: [Float] = [1.4839]
         
         cancellable.insert(
             preferences.$floatValue.removeDuplicates().sink {
@@ -363,9 +367,9 @@ class PreferenceTests: XCTestCase {
             }
         )
         
-        XCTAssertEqual(preferences.floatValue, 1.8874)
+        XCTAssertEqual(preferences.floatValue, 1.4839)
 
-        var oldValue: Float = 1.8874
+        var oldValue: Float = 1.4839
 
         for _ in 0..<10 {
             let newValue = Float.random(in: 0...255)
@@ -417,7 +421,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalFloatValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalFloatValue"))
+                XCTAssertEqual(store.float(forKey: "OptionalFloatValue"), 0.0)
             } else {
                 XCTAssertEqual(store.float(forKey: "OptionalFloatValue"), newValue)
             }
@@ -433,7 +437,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalFloatValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalFloatValue"))
+                XCTAssertEqual(store.float(forKey: "OptionalFloatValue"), 0.0)
             } else {
                 XCTAssertEqual(store.float(forKey: "OptionalFloatValue"), newValue)
             }
@@ -444,7 +448,7 @@ class PreferenceTests: XCTestCase {
         
     func testStringValueReadWritePreference() {
         var stringValues: [String] = []
-        var expectValues: [String] = ["F1FOe4MS"]
+        var expectValues: [String] = ["aZ2zRcbF"]
         
         cancellable.insert(
             preferences.$stringValue.removeDuplicates().sink {
@@ -452,9 +456,9 @@ class PreferenceTests: XCTestCase {
             }
         )
         
-        XCTAssertEqual(preferences.stringValue, "F1FOe4MS")
+        XCTAssertEqual(preferences.stringValue, "aZ2zRcbF")
 
-        var oldValue: String = "F1FOe4MS"
+        var oldValue: String = "aZ2zRcbF"
 
         for _ in 0..<10 {
             let newValue = String.random()
@@ -506,7 +510,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalStringValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalStringValue"))
+                XCTAssertEqual(store.string(forKey: "OptionalStringValue"), nil)
             } else {
                 XCTAssertEqual(store.string(forKey: "OptionalStringValue"), newValue)
             }
@@ -522,7 +526,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalStringValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalStringValue"))
+                XCTAssertEqual(store.string(forKey: "OptionalStringValue"), nil)
             } else {
                 XCTAssertEqual(store.string(forKey: "OptionalStringValue"), newValue)
             }
@@ -533,7 +537,7 @@ class PreferenceTests: XCTestCase {
         
     func testURLValueReadWritePreference() {
         var urlValues: [URL] = []
-        var expectValues: [URL] = [URL(string: "https://bY2ftCF4.com")!]
+        var expectValues: [URL] = [URL(string: "https://Zq6RmKFz.com")!]
         
         cancellable.insert(
             preferences.$urlValue.removeDuplicates().sink {
@@ -541,9 +545,9 @@ class PreferenceTests: XCTestCase {
             }
         )
         
-        XCTAssertEqual(preferences.urlValue, URL(string: "https://bY2ftCF4.com")!)
+        XCTAssertEqual(preferences.urlValue, URL(string: "https://Zq6RmKFz.com")!)
 
-        var oldValue: URL = URL(string: "https://bY2ftCF4.com")!
+        var oldValue: URL = URL(string: "https://Zq6RmKFz.com")!
 
         for _ in 0..<10 {
             let newValue = URL(string: "https://" + .random() + ".com")!
@@ -595,9 +599,9 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalURLValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalURLValue"))
+                XCTAssertEqual(store.url(forKey: "OptionalURLValue"), nil)
             } else {
-                XCTAssertEqual(store.url(forKey: "OptionalURLValue")?.absoluteURL.path, newValue?.absoluteURL.path)
+                XCTAssertEqual(store.url(forKey: "OptionalURLValue"), newValue)
             }
         }
 
@@ -611,9 +615,9 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalURLValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalURLValue"))
+                XCTAssertEqual(store.url(forKey: "OptionalURLValue"), nil)
             } else {
-                XCTAssertEqual(store.url(forKey: "OptionalURLValue")?.absoluteURL.path, newValue?.absoluteURL.path)
+                XCTAssertEqual(store.url(forKey: "OptionalURLValue"), newValue)
             }
         }
 
@@ -684,7 +688,7 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalDataValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalDataValue"))
+                XCTAssertEqual(store.data(forKey: "OptionalDataValue"), nil)
             } else {
                 XCTAssertEqual(store.data(forKey: "OptionalDataValue"), newValue)
             }
@@ -700,12 +704,101 @@ class PreferenceTests: XCTestCase {
             oldValue = newValue
             XCTAssertEqual(preferences.optionalDataValue, newValue)
             if newValue == nil {
-                XCTAssertNil(store.object(forKey: "OptionalDataValue"))
+                XCTAssertEqual(store.data(forKey: "OptionalDataValue"), nil)
             } else {
                 XCTAssertEqual(store.data(forKey: "OptionalDataValue"), newValue)
             }
         }
 
         XCTAssertEqual(optionalDataValues, expectValues)
+    }
+        
+    func testDateValueReadWritePreference() {
+        var dateValues: [Date] = []
+        var expectValues: [Date] = [.distantPast]
+        
+        cancellable.insert(
+            preferences.$dateValue.removeDuplicates().sink {
+                dateValues.append($0)
+            }
+        )
+        
+        XCTAssertEqual(preferences.dateValue, .distantPast)
+
+        var oldValue: Date = .distantPast
+
+        for _ in 0..<10 {
+            let newValue = Date.distantPast
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.dateValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.dateValue, newValue)
+            XCTAssertEqual(store.object(forKey: "DateValue") as? Date, newValue)
+        }
+
+        for _ in 0..<10 {
+            let newValue = Date.distantPast
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "DateValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.dateValue, newValue)
+            XCTAssertEqual(store.object(forKey: "DateValue") as? Date, newValue)
+        }
+
+        XCTAssertEqual(dateValues, expectValues)
+    }
+
+    func testOptionalDateValueReadWriteWithPreference() {
+        var optionalDateValues: [Date?] = []
+        var expectValues: [Date?] = [nil]
+        
+        cancellable.insert(
+            preferences.$optionalDateValue.removeDuplicates().sink {
+                optionalDateValues.append($0)
+            }
+        )
+        
+        XCTAssertNil(preferences.optionalDateValue)
+        XCTAssertNil(store.object(forKey: "OptionalDateValue"))
+
+        var oldValue: Date? = nil
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, Date.distantPast]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            preferences.optionalDateValue = newValue
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalDateValue, newValue)
+            if newValue == nil {
+                XCTAssertEqual(store.object(forKey: "OptionalDateValue") as? Date, nil)
+            } else {
+                XCTAssertEqual(store.object(forKey: "OptionalDateValue") as? Date, newValue)
+            }
+        }
+
+        for _ in 0..<10 {
+            let allowedValues = [nil, Date.distantPast]
+            let newValue = allowedValues.randomElement()!
+            if newValue != oldValue {
+                expectValues.append(newValue)
+            }
+            store.set(newValue, forKey: "OptionalDateValue")
+            oldValue = newValue
+            XCTAssertEqual(preferences.optionalDateValue, newValue)
+            if newValue == nil {
+                XCTAssertEqual(store.object(forKey: "OptionalDateValue") as? Date, nil)
+            } else {
+                XCTAssertEqual(store.object(forKey: "OptionalDateValue") as? Date, newValue)
+            }
+        }
+
+        XCTAssertEqual(optionalDateValues, expectValues)
     }
 }
