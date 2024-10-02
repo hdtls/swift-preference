@@ -1,25 +1,37 @@
-name: Swift CI
+name: Pull Request Validation (CI)
 
 on:
-  push:
-    branches: 
-      - 'main'
-    tags: 
-      - '*'
   pull_request:
-    branches: 
-      - 'main'
+    paths-ignore:
+      - '**.md'
+  push:
+    branches:
+      - main
+      - release/*
+    tags:
+      - '*'
+    paths-ignore:
+      - '**.md'
 
 jobs:
-  build:
-    runs-on: macos-12
+  test:
+    name: pull request validation (${{ matrix.swift-version }}-${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest]
+        swift-version: ["6.0"]
+
     steps:
-    - name: Setup Swift to 5.7
-      uses: swift-actions/setup-swift@v1
-      with:
-        swift-version: 5.7
-    
-    - uses: actions/checkout@v3
-    
-    - name: Build & test...
-      run: swift test --parallel
+      - name: Checkout repository...
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup swift ${{ matrix.swift-version  }}
+        uses: hdtls/setup-swift@main
+        with: 
+          swift-version: ${{matrix.swift-version}}
+
+      - name: Build and test...
+        run: swift test -Xswiftc -warnings-as-errors
