@@ -26,240 +26,243 @@ import Foundation
 
 /// A type that can be converted to and from an associated preference value.
 public protocol PreferenceRepresentable {
-    
-    /// Initialize an `PreferenceRepresentable` instance with specified preference value.
-    ///
-    /// If there is no value of the type that corresponds with the specified preference value,
-    /// this initializer returns `nil`. For example:
-    ///
-    ///     print(Bool(preferenceValue: ["Illegal"]))
-    ///     // Prints "nil"
-    init?(preferenceValue: Any)
-    
-    /// The corresponding value of the preference type.
-    var preferenceValue: Any? { get }
+
+  /// Initialize an `PreferenceRepresentable` instance with specified preference value.
+  ///
+  /// If there is no value of the type that corresponds with the specified preference value,
+  /// this initializer returns `nil`. For example:
+  ///
+  ///     print(Bool(preferenceValue: ["Illegal"]))
+  ///     // Prints "nil"
+  init?(preferenceValue: Any)
+
+  /// The corresponding value of the preference type.
+  var preferenceValue: Any? { get }
 }
 
 extension Bool: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        switch preferenceValue {
-            case let val as Bool:
-                self = val
-            case let val as Int:
-                self = val != 0
-            case let val as Float:
-                self = val != 0
-            case let val as Double:
-                self = val != 0
-            case let val as String:
-                self = NSString(string: val).boolValue
-            default:
-                return nil
-        }
+
+  public init?(preferenceValue: Any) {
+    switch preferenceValue {
+    case let val as Bool:
+      self = val
+    case let val as Int:
+      self = val != 0
+    case let val as Float:
+      self = val != 0
+    case let val as Double:
+      self = val != 0
+    case let val as String:
+      self = NSString(string: val).boolValue
+    default:
+      return nil
     }
-    
-    public var preferenceValue: Any? {
-        self
-    }
+  }
+
+  public var preferenceValue: Any? {
+    self
+  }
 }
 
 extension Int: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        switch preferenceValue {
-            case let val as Int:
-                self = val
-            case let val as String:
-                self = NSString(string: val).integerValue
-            default:
-                return nil
-        }
+
+  public init?(preferenceValue: Any) {
+    switch preferenceValue {
+    case let val as Int:
+      self = val
+    case let val as String:
+      self = NSString(string: val).integerValue
+    default:
+      return nil
     }
-    
-    public var preferenceValue: Any? {
-        self
-    }
+  }
+
+  public var preferenceValue: Any? {
+    self
+  }
 }
 
 extension Double: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        switch preferenceValue {
-            case let val as Double:
-                self = val
-            case let val as String:
-                self = NSString(string: val).doubleValue
-            default:
-                return nil
-        }
+
+  public init?(preferenceValue: Any) {
+    switch preferenceValue {
+    case let val as Double:
+      self = val
+    case let val as String:
+      self = NSString(string: val).doubleValue
+    default:
+      return nil
     }
-    
-    public var preferenceValue: Any? {
-        self
-    }
+  }
+
+  public var preferenceValue: Any? {
+    self
+  }
 }
 
 extension Float: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        switch preferenceValue {
-            case let val as Float:
-                self = val
-            case let val as String:
-                self = NSString(string: val).floatValue
-            default:
-                return nil
-        }
+
+  public init?(preferenceValue: Any) {
+    switch preferenceValue {
+    case let val as Float:
+      self = val
+    case let val as String:
+      self = NSString(string: val).floatValue
+    default:
+      return nil
     }
-    
-    public var preferenceValue: Any? {
-        self
-    }
+  }
+
+  public var preferenceValue: Any? {
+    self
+  }
 }
 
 extension String: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        guard let val = preferenceValue as? String else { return nil }
-        self = val
-    }
-    
-    public var preferenceValue: Any? {
-        self
-    }
+
+  public init?(preferenceValue: Any) {
+    guard let val = preferenceValue as? String else { return nil }
+    self = val
+  }
+
+  public var preferenceValue: Any? {
+    self
+  }
 }
 
 extension URL: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        switch preferenceValue {
-            case let val as URL:
-                self = val
-            case let val as String:
-                self = URL(fileURLWithPath: NSString(string: val).expandingTildeInPath)
-            case let val as Data:
-                if #available(iOS 11.0, macOS 10.13, tvOS 11.0, watchOS 4.0, *) {
-                    guard let url = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSURL.self, from: val) else {
-                        return nil
-                    }
-                    self = url as URL
-                } else {
-                    // Fallback on earlier versions
-                    guard let url = NSKeyedUnarchiver.unarchiveObject(with: val) as? NSURL else {
-                        return nil
-                    }
-                    self = url as URL
-                }
-            default:
-                return nil
+
+  public init?(preferenceValue: Any) {
+    switch preferenceValue {
+    case let val as URL:
+      self = val
+    case let val as String:
+      self = URL(fileURLWithPath: NSString(string: val).expandingTildeInPath)
+    case let val as Data:
+      if #available(iOS 11.0, macOS 10.13, tvOS 11.0, watchOS 4.0, *) {
+        guard let url = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSURL.self, from: val)
+        else {
+          return nil
         }
-    }
-    
-    public var preferenceValue: Any? {
-        if #available(iOS 11.0, macOS 10.13, tvOS 11.0, watchOS 4.0, *) {
-            return try? NSKeyedArchiver.archivedData(withRootObject: self as NSURL, requiringSecureCoding: true)
-        } else {
-            return NSKeyedArchiver.archivedData(withRootObject: self as NSURL)
+        self = url as URL
+      } else {
+        // Fallback on earlier versions
+        guard let url = NSKeyedUnarchiver.unarchiveObject(with: val) as? NSURL else {
+          return nil
         }
+        self = url as URL
+      }
+    default:
+      return nil
     }
+  }
+
+  public var preferenceValue: Any? {
+    if #available(iOS 11.0, macOS 10.13, tvOS 11.0, watchOS 4.0, *) {
+      return try? NSKeyedArchiver.archivedData(
+        withRootObject: self as NSURL, requiringSecureCoding: true)
+    } else {
+      return NSKeyedArchiver.archivedData(withRootObject: self as NSURL)
+    }
+  }
 }
 
 extension Data: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        guard let val = preferenceValue as? Data else {
-            return nil
-        }
-        self = val
+
+  public init?(preferenceValue: Any) {
+    guard let val = preferenceValue as? Data else {
+      return nil
     }
-    
-    public var preferenceValue: Any? {
-        self
-    }
+    self = val
+  }
+
+  public var preferenceValue: Any? {
+    self
+  }
 }
 
 extension Date: PreferenceRepresentable {
-    public init?(preferenceValue: Any) {
-        guard let val = preferenceValue as? Date else {
-            return nil
-        }
-        self = val
+  public init?(preferenceValue: Any) {
+    guard let val = preferenceValue as? Date else {
+      return nil
     }
+    self = val
+  }
 
-    public var preferenceValue: Any? {
-        self
-    }
+  public var preferenceValue: Any? {
+    self
+  }
 }
 
 extension Array: PreferenceRepresentable where Element: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        guard let val = preferenceValue as? [Any] else {
-            return nil
-        }
-        
-        self = val.compactMap {
-            Element(preferenceValue: $0)
-        }
+
+  public init?(preferenceValue: Any) {
+    guard let val = preferenceValue as? [Any] else {
+      return nil
     }
-    
-    public var preferenceValue: Any? {
-        self.compactMap {
-            $0.preferenceValue
-        }
+
+    self = val.compactMap {
+      Element(preferenceValue: $0)
     }
+  }
+
+  public var preferenceValue: Any? {
+    self.compactMap {
+      $0.preferenceValue
+    }
+  }
 }
 
 extension Dictionary: PreferenceRepresentable where Key == String, Value: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        guard let val = preferenceValue as? [String : Any] else {
-            return nil
-        }
-        
-        self = val.compactMapValues {
-            Value(preferenceValue: $0)
-        }
+
+  public init?(preferenceValue: Any) {
+    guard let val = preferenceValue as? [String: Any] else {
+      return nil
     }
-    
-    public var preferenceValue: Any? {
-        compactMapValues {
-            $0.preferenceValue
-        }
+
+    self = val.compactMapValues {
+      Value(preferenceValue: $0)
     }
+  }
+
+  public var preferenceValue: Any? {
+    compactMapValues {
+      $0.preferenceValue
+    }
+  }
 }
 
 extension Optional: PreferenceRepresentable where Wrapped: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        if let val = Wrapped(preferenceValue: preferenceValue) {
-            self = .some(val)
-        } else {
-            self = .none
-        }
+
+  public init?(preferenceValue: Any) {
+    if let val = Wrapped(preferenceValue: preferenceValue) {
+      self = .some(val)
+    } else {
+      self = .none
     }
-    
-    public var preferenceValue: Any? {
-        switch self {
-            case .none:
-                return nil
-            case .some(let wrapped):
-                return wrapped.preferenceValue
-        }
+  }
+
+  public var preferenceValue: Any? {
+    switch self {
+    case .none:
+      return nil
+    case .some(let wrapped):
+      return wrapped.preferenceValue
     }
+  }
 }
 
-extension PreferenceRepresentable where Self: RawRepresentable, Self.RawValue: PreferenceRepresentable {
-    
-    public init?(preferenceValue: Any) {
-        guard let rawValue = RawValue(preferenceValue: preferenceValue) else {
-            return nil
-        }
-        self.init(rawValue: rawValue)
+extension PreferenceRepresentable
+where Self: RawRepresentable, Self.RawValue: PreferenceRepresentable {
+
+  public init?(preferenceValue: Any) {
+    guard let rawValue = RawValue(preferenceValue: preferenceValue) else {
+      return nil
     }
-    
-    public var preferenceValue: Any? {
-        self.rawValue.preferenceValue
-    }
+    self.init(rawValue: rawValue)
+  }
+
+  public var preferenceValue: Any? {
+    self.rawValue.preferenceValue
+  }
 }
