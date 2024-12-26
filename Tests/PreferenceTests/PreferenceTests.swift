@@ -1,25 +1,25 @@
 //
-//  Preference.swift
+// MIT License
 //
-//  Copyright (c) 2022 Junfeng Zhang
+// Copyright (c) 2022 Junfeng Zhang and the Preference project authors
 //
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 //
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 //
 
 ///
@@ -37,29 +37,31 @@ extension String {
     String(
       (0..<length).map { _ in
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".randomElement()!
-      })
+      }
+    )
   }
 }
 
 let store: UserDefaults = .init(suiteName: "swift-preference/\(UUID().uuidString)")!
 
+// swift-format-ignore: DontRepeatTypeInStaticProperties
 extension String {
-  static let boolValue: String = "BoolValue"
-  static let optionalBoolValue: String = "OptionalBoolValue"
-  static let intValue: String = "IntValue"
-  static let optionalIntValue: String = "OptionalIntValue"
-  static let doubleValue: String = "DoubleValue"
-  static let optionalDoubleValue: String = "OptionalDoubleValue"
-  static let floatValue: String = "FloatValue"
-  static let optionalFloatValue: String = "OptionalFloatValue"
-  static let stringValue: String = "StringValue"
-  static let optionalStringValue: String = "OptionalStringValue"
-  static let urlValue: String = "URLValue"
-  static let optionalURLValue: String = "OptionalURLValue"
-  static let dataValue: String = "DataValue"
-  static let optionalDataValue: String = "OptionalDataValue"
-  static let dateValue: String = "DateValue"
-  static let optionalDateValue: String = "OptionalDateValue"
+  static let boolValue = "BoolValue"
+  static let optionalBoolValue = "OptionalBoolValue"
+  static let intValue = "IntValue"
+  static let optionalIntValue = "OptionalIntValue"
+  static let doubleValue = "DoubleValue"
+  static let optionalDoubleValue = "OptionalDoubleValue"
+  static let floatValue = "FloatValue"
+  static let optionalFloatValue = "OptionalFloatValue"
+  static let stringValue = "StringValue"
+  static let optionalStringValue = "OptionalStringValue"
+  static let urlValue = "URLValue"
+  static let optionalURLValue = "OptionalURLValue"
+  static let dataValue = "DataValue"
+  static let optionalDataValue = "OptionalDataValue"
+  static let dateValue = "DateValue"
+  static let optionalDateValue = "OptionalDateValue"
 }
 
 class PreferenceTests: XCTestCase {
@@ -67,15 +69,15 @@ class PreferenceTests: XCTestCase {
   struct Preferences {
     @Preference(.boolValue, store: store) var boolValue: Bool = true
     @Preference(.optionalBoolValue, store: store) var optionalBoolValue: Bool?
-    @Preference(.intValue, store: store) var intValue: Int = 0
+    @Preference(.intValue, store: store) var intValue: Int = 9
     @Preference(.optionalIntValue, store: store) var optionalIntValue: Int?
-    @Preference(.doubleValue, store: store) var doubleValue: Double = 0.30012682219806486
+    @Preference(.doubleValue, store: store) var doubleValue: Double = 0.963478609704102
     @Preference(.optionalDoubleValue, store: store) var optionalDoubleValue: Double?
-    @Preference(.floatValue, store: store) var floatValue: Float = 1.6747
+    @Preference(.floatValue, store: store) var floatValue: Float = 1.9783
     @Preference(.optionalFloatValue, store: store) var optionalFloatValue: Float?
-    @Preference(.stringValue, store: store) var stringValue: String = "6D2bZMtU"
+    @Preference(.stringValue, store: store) var stringValue: String = "tjQcBeXY"
     @Preference(.optionalStringValue, store: store) var optionalStringValue: String?
-    @Preference(.urlValue, store: store) var urlValue: URL = URL(string: "https://hXaAESve.com")!
+    @Preference(.urlValue, store: store) var urlValue: URL = URL(string: "https://KiLev3hf.com")!
     @Preference(.optionalURLValue, store: store) var optionalURLValue: URL?
     @Preference(.dataValue, store: store) var dataValue: Data = .init()
     @Preference(.optionalDataValue, store: store) var optionalDataValue: Data?
@@ -187,7 +189,7 @@ class PreferenceTests: XCTestCase {
 
   func testReadWriteIntValueWithPreference() {
     var intValues: [Int] = []
-    var expectValues: [Int] = [0]
+    var expectValues: [Int] = [9]
 
     cancellable.insert(
       preferences.$intValue.sink {
@@ -195,9 +197,9 @@ class PreferenceTests: XCTestCase {
       }
     )
 
-    XCTAssertEqual(preferences.intValue, 0)
+    XCTAssertEqual(preferences.intValue, 9)
 
-    var oldValue: Int = 0
+    var oldValue: Int = 9
 
     for _ in 0..<10 {
       let newValue = Int.random(in: 0...255)
@@ -280,7 +282,7 @@ class PreferenceTests: XCTestCase {
 
   func testReadWriteDoubleValueWithPreference() {
     var doubleValues: [Double] = []
-    var expectValues: [Double] = [0.30012682219806486]
+    var expectValues: [Double] = [0.963478609704102]
 
     cancellable.insert(
       preferences.$doubleValue.sink {
@@ -288,9 +290,9 @@ class PreferenceTests: XCTestCase {
       }
     )
 
-    XCTAssertEqual(preferences.doubleValue, 0.30012682219806486)
+    XCTAssertEqual(preferences.doubleValue, 0.963478609704102)
 
-    var oldValue: Double = 0.30012682219806486
+    var oldValue: Double = 0.963478609704102
 
     for _ in 0..<10 {
       let newValue = Double.random(in: 0...255)
@@ -373,7 +375,7 @@ class PreferenceTests: XCTestCase {
 
   func testReadWriteFloatValueWithPreference() {
     var floatValues: [Float] = []
-    var expectValues: [Float] = [1.6747]
+    var expectValues: [Float] = [1.9783]
 
     cancellable.insert(
       preferences.$floatValue.sink {
@@ -381,9 +383,9 @@ class PreferenceTests: XCTestCase {
       }
     )
 
-    XCTAssertEqual(preferences.floatValue, 1.6747)
+    XCTAssertEqual(preferences.floatValue, 1.9783)
 
-    var oldValue: Float = 1.6747
+    var oldValue: Float = 1.9783
 
     for _ in 0..<10 {
       let newValue = Float.random(in: 0...255)
@@ -466,7 +468,7 @@ class PreferenceTests: XCTestCase {
 
   func testReadWriteStringValueWithPreference() {
     var stringValues: [String] = []
-    var expectValues: [String] = ["6D2bZMtU"]
+    var expectValues: [String] = ["tjQcBeXY"]
 
     cancellable.insert(
       preferences.$stringValue.sink {
@@ -474,9 +476,9 @@ class PreferenceTests: XCTestCase {
       }
     )
 
-    XCTAssertEqual(preferences.stringValue, "6D2bZMtU")
+    XCTAssertEqual(preferences.stringValue, "tjQcBeXY")
 
-    var oldValue: String = "6D2bZMtU"
+    var oldValue: String = "tjQcBeXY"
 
     for _ in 0..<10 {
       let newValue = String.random()
@@ -559,7 +561,7 @@ class PreferenceTests: XCTestCase {
 
   func testReadWriteURLValueWithPreference() {
     var urlValues: [URL] = []
-    var expectValues: [URL] = [URL(string: "https://hXaAESve.com")!]
+    var expectValues: [URL] = [URL(string: "https://KiLev3hf.com")!]
 
     cancellable.insert(
       preferences.$urlValue.sink {
@@ -567,9 +569,9 @@ class PreferenceTests: XCTestCase {
       }
     )
 
-    XCTAssertEqual(preferences.urlValue, URL(string: "https://hXaAESve.com")!)
+    XCTAssertEqual(preferences.urlValue, URL(string: "https://KiLev3hf.com")!)
 
-    var oldValue: URL = URL(string: "https://hXaAESve.com")!
+    var oldValue: URL = URL(string: "https://KiLev3hf.com")!
 
     for _ in 0..<10 {
       let newValue = URL(string: "https://" + .random() + ".com")!

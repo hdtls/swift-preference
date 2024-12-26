@@ -28,7 +28,7 @@ let package = Package(
       ]),
     .testTarget(
       name: "PreferenceTests",
-      dependencies: ["Preference"],
-      exclude: ["PreferenceTests.swift.gyb"]),
+      dependencies: ["Preference"]
+    ),
   ]
 )
