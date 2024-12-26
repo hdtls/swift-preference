@@ -22,12 +22,25 @@
 //  THE SOFTWARE.
 //
 
-@preconcurrency import Combine
-@preconcurrency import Foundation
+import Foundation
 
+#if canImport(Combine)
+  @_exported import Combine
+#else
+  @_exported import OpenCombine
+#endif
+
+@available(
+  *, deprecated,
+  message: "This will be removed in the next major version, please use String instead"
+)
 extension UserDefaults {
 
   /// UserDefaults field key.
+  @available(
+    *, deprecated,
+    message: "This will be removed in the next major version, please use String instead"
+  )
   public struct FieldKey: RawRepresentable {
 
     public typealias RawValue = String
@@ -40,18 +53,33 @@ extension UserDefaults {
   }
 
   /// UserDefaults DefaultName
-  @available(*, deprecated, renamed: "FieldKey")
+  @available(
+    *, deprecated, renamed: "FieldKey",
+    message: "This will be removed in the next major version, please use String instead"
+  )
   public typealias DefaultName = FieldKey
 }
 
+@available(
+  *, deprecated,
+  message: "This will be removed in the next major version, please use String instead"
+)
 extension UserDefaults.FieldKey: ExpressibleByStringLiteral {
 
+  @available(
+    *, deprecated,
+    message: "This will be removed in the next major version, please use String instead"
+  )
   public init(stringLiteral value: StringLiteralType) {
     self.init(rawValue: value)
   }
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
+  @available(
+    *, deprecated,
+    message: "This will be removed in the next major version, please use String instead"
+  )
   extension UserDefaults.FieldKey: Sendable {}
 #endif
 
@@ -59,7 +87,7 @@ extension UserDefaults.FieldKey: ExpressibleByStringLiteral {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 @propertyWrapper public struct Preference<Value> where Value: PreferenceRepresentable {
 
-  private let publisher: Publisher
+  private let publisher: Publisher<Value>
 
   /// Creates a property that can read and write to a raw representable user default.
   ///
@@ -83,8 +111,13 @@ extension UserDefaults.FieldKey: ExpressibleByStringLiteral {
   ///     store.
   ///   - store: The user defaults store to read and write to. A value
   ///     of `nil` will use the user default store from the environment.
+  @available(
+    *, deprecated,
+    message:
+      "This will be removed in the next major version, please use init(wrappedValue:_:store:) with String key instead"
+  )
   public init(wrappedValue: Value, _ key: UserDefaults.FieldKey, store: UserDefaults? = nil) {
-    publisher = .init(wrappedValue: wrappedValue, key, store: store)
+    self.init(wrappedValue: wrappedValue, key.rawValue, store: store)
   }
 
   public var wrappedValue: Value {
@@ -92,7 +125,7 @@ extension UserDefaults.FieldKey: ExpressibleByStringLiteral {
     set { publisher.value = newValue }
   }
 
-  public var projectedValue: Publisher { publisher }
+  public var projectedValue: Publisher<Value> { publisher }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -116,8 +149,13 @@ extension Preference where Value: ExpressibleByNilLiteral {
   ///     store.
   ///   - store: The user defaults store to read and write to. A value
   ///     of `nil` will use the user default store from the environment.
+  @available(
+    *, deprecated,
+    message:
+      "This will be removed in the next major version, please use init(_:store:) with String key instead"
+  )
   public init<O>(_ key: UserDefaults.FieldKey, store: UserDefaults? = nil) where Value == O? {
-    publisher = .init(key, store: store)
+    self.init(key.rawValue, store: store)
   }
 }
 
@@ -125,20 +163,23 @@ extension Preference where Value: ExpressibleByNilLiteral {
 extension Preference {
 
   @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-  final public class Publisher: NSObject, Combine.Publisher {
+  final public class Publisher<Output>: NSObject where Output: PreferenceRepresentable {
 
-    public typealias Output = Value
     public typealias Failure = Never
 
     private let key: String
     private let store: UserDefaults
     private let subject: CurrentValueSubject<Output, Failure>
-    private let wrappedValue: Value
+    private let wrappedValue: Output
 
-    public var value: Value {
+    public var value: Output {
       get { subject.value }
       set {
         store.set(newValue.preferenceValue, forKey: key)
+        // Non Darwin platform does not support KVO, so we direct update subject value.
+        #if !canImport(Darwin)
+          subject.value = newValue
+        #endif
       }
     }
 
@@ -151,7 +192,7 @@ extension Preference {
     ///     store.
     ///   - store: The user defaults store to read and write to. A value
     ///     of `nil` will use the user default store from the environment.
-    public init(wrappedValue: Value, _ key: String, store: UserDefaults? = nil) {
+    public init(wrappedValue: Output, _ key: String, store: UserDefaults? = nil) {
       assert(
         !key.contains("."), "Do not use keys containing dots for UserDefaults KVO to work properly."
       )
@@ -161,13 +202,15 @@ extension Preference {
       self.wrappedValue = wrappedValue
 
       if let val = self.store.object(forKey: key) {
-        self.subject = .init(Value(preferenceValue: val) ?? wrappedValue)
+        self.subject = .init(Output(preferenceValue: val) ?? wrappedValue)
       } else {
         self.subject = .init(wrappedValue)
       }
 
       super.init()
-      self.store.addObserver(self, forKeyPath: key, options: .new, context: nil)
+      #if canImport(Darwin)
+        self.store.addObserver(self, forKeyPath: key, options: .new, context: nil)
+      #endif
     }
 
     /// Creates a publisher that publish the current value for a user default.
@@ -179,147 +222,138 @@ extension Preference {
     ///     store.
     ///   - store: The user defaults store to read and write to. A value
     ///     of `nil` will use the user default store from the environment.
-    public init(wrappedValue: Value, _ key: UserDefaults.FieldKey, store: UserDefaults? = nil) {
-      assert(
-        !key.rawValue.contains("."),
-        "Do not use keys containing dots for UserDefaults KVO to work properly.")
-
-      self.key = key.rawValue
-      self.store = store ?? .standard
-      self.wrappedValue = wrappedValue
-
-      if let val = self.store.object(forKey: key.rawValue) {
-        self.subject = .init(Value(preferenceValue: val) ?? wrappedValue)
-      } else {
-        self.subject = .init(wrappedValue)
-      }
-
-      super.init()
-      self.store.addObserver(self, forKeyPath: key.rawValue, options: .new, context: nil)
-    }
-
-    /// Creates a publisher that publish the current value for a user default.
-    ///
-    /// - Parameters:
-    ///   - key: The key to read and write the value to in the user defaults
-    ///     store.
-    ///   - store: The user defaults store to read and write to. A value
-    ///     of `nil` will use the user default store from the environment.
-    public init<O>(_ key: String, store: UserDefaults? = nil) where Value == O? {
-      assert(
-        !key.contains("."), "Do not use keys containing dots for UserDefaults KVO to work properly."
-      )
-
-      self.key = key
-      self.store = store ?? .standard
-      self.wrappedValue = nil
-
-      if let val = self.store.object(forKey: key) {
-        self.subject = .init(O(preferenceValue: val))
-      } else {
-        self.subject = .init(wrappedValue)
-      }
-
-      super.init()
-      self.store.addObserver(self, forKeyPath: key, options: .new, context: nil)
-    }
-
-    /// Creates a publisher that publish the current value for a user default.
-    ///
-    /// - Parameters:
-    ///   - key: The key to read and write the value to in the user defaults
-    ///     store.
-    ///   - store: The user defaults store to read and write to. A value
-    ///     of `nil` will use the user default store from the environment.
-    public init<O>(_ key: UserDefaults.FieldKey, store: UserDefaults? = nil) where Value == O? {
-      assert(
-        !key.rawValue.contains("."),
-        "Do not use keys containing dots for UserDefaults KVO to work properly.")
-
-      self.key = key.rawValue
-      self.store = store ?? .standard
-      self.wrappedValue = nil
-
-      if let val = self.store.object(forKey: key.rawValue) {
-        self.subject = .init(O(preferenceValue: val))
-      } else {
-        self.subject = .init(wrappedValue)
-      }
-
-      super.init()
-      self.store.addObserver(self, forKeyPath: key.rawValue, options: .new, context: nil)
-    }
-
-    deinit {
-      store.removeObserver(self, forKeyPath: key)
-    }
-
-    public override func observeValue(
-      forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?,
-      context: UnsafeMutableRawPointer?
+    @available(
+      *, deprecated,
+      message:
+        "This will be removed in the next major version, please use init(wrappedValue:_:store:) with String key instead"
+    )
+    public convenience init(
+      wrappedValue: Output, _ key: UserDefaults.FieldKey, store: UserDefaults? = nil
     ) {
-      guard keyPath == key else {
-        super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-        return
-      }
-
-      // If value changed to nil fallback to default value.
-      guard let object = change?[.newKey] else {
-        self.subject.value = wrappedValue
-        return
-      }
-
-      // Remove duplicated elements
-      switch Value.self {
-      case is Bool.Type:
-        if self.subject.value as? Bool != (Value(preferenceValue: object) ?? wrappedValue) as? Bool
-        {
-          self.subject.value = Value(preferenceValue: object) ?? wrappedValue
-        }
-      case is Int.Type:
-        if self.subject.value as? Int != (Value(preferenceValue: object) ?? wrappedValue) as? Int {
-          self.subject.value = Value(preferenceValue: object) ?? wrappedValue
-        }
-      case is Double.Type:
-        if self.subject.value as? Double != (Value(preferenceValue: object) ?? wrappedValue)
-          as? Double
-        {
-          self.subject.value = Value(preferenceValue: object) ?? wrappedValue
-        }
-      case is Float.Type:
-        if self.subject.value as? Float != (Value(preferenceValue: object) ?? wrappedValue)
-          as? Float
-        {
-          self.subject.value = Value(preferenceValue: object) ?? wrappedValue
-        }
-      case is String.Type:
-        if self.subject.value as? String != (Value(preferenceValue: object) ?? wrappedValue)
-          as? String
-        {
-          self.subject.value = Value(preferenceValue: object) ?? wrappedValue
-        }
-      case is URL.Type:
-        if self.subject.value as? URL != (Value(preferenceValue: object) ?? wrappedValue) as? URL {
-          self.subject.value = Value(preferenceValue: object) ?? wrappedValue
-        }
-      case is Data.Type:
-        if self.subject.value as? Data != (Value(preferenceValue: object) ?? wrappedValue) as? Data
-        {
-          self.subject.value = Value(preferenceValue: object) ?? wrappedValue
-        }
-      case is Date.Type:
-        if self.subject.value as? Date != (Value(preferenceValue: object) ?? wrappedValue) as? Date
-        {
-          self.subject.value = Value(preferenceValue: object) ?? wrappedValue
-        }
-      default:
-        self.subject.value = Value(preferenceValue: object) ?? wrappedValue
-      }
+      self.init(wrappedValue: wrappedValue, key.rawValue, store: store)
     }
 
-    public func receive<S>(
-      subscriber: S
-    ) where S: Combine.Subscriber, Failure == S.Failure, Output == S.Input {
+    /// Creates a publisher that publish the current value for a user default.
+    ///
+    /// - Parameters:
+    ///   - key: The key to read and write the value to in the user defaults
+    ///     store.
+    ///   - store: The user defaults store to read and write to. A value
+    ///     of `nil` will use the user default store from the environment.
+    public init<O>(_ key: String, store: UserDefaults? = nil) where Output == O? {
+      assert(
+        !key.contains("."), "Do not use keys containing dots for UserDefaults KVO to work properly."
+      )
+
+      self.key = key
+      self.store = store ?? .standard
+      self.wrappedValue = nil
+
+      if let val = self.store.object(forKey: key) {
+        self.subject = .init(O(preferenceValue: val))
+      } else {
+        self.subject = .init(wrappedValue)
+      }
+
+      super.init()
+      #if canImport(Darwin)
+        self.store.addObserver(self, forKeyPath: key, options: .new, context: nil)
+      #endif
+    }
+
+    /// Creates a publisher that publish the current value for a user default.
+    ///
+    /// - Parameters:
+    ///   - key: The key to read and write the value to in the user defaults
+    ///     store.
+    ///   - store: The user defaults store to read and write to. A value
+    ///     of `nil` will use the user default store from the environment.
+    @available(
+      *, deprecated,
+      message:
+        "This will be removed in the next major version, please use init(_:store:) with String key instead"
+    )
+    public convenience init<O>(_ key: UserDefaults.FieldKey, store: UserDefaults? = nil)
+    where Output == O? {
+      self.init(key.rawValue, store: store)
+    }
+
+    #if canImport(Darwin)
+      deinit {
+        store.removeObserver(self, forKeyPath: key)
+      }
+
+      public override func observeValue(
+        forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?,
+        context: UnsafeMutableRawPointer?
+      ) {
+        guard keyPath == key else {
+          super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
+          return
+        }
+
+        // If value changed to nil fallback to default value.
+        guard let object = change?[.newKey] else {
+          self.subject.value = wrappedValue
+          return
+        }
+        let newValue = Output(preferenceValue: object)
+
+        subject.value = newValue ?? wrappedValue
+      }
+    #endif
+  }
+}
+
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+extension Preference.Publisher: Publisher {
+
+  public func receive<S>(
+    subscriber: S
+  ) where S: Subscriber, Failure == S.Failure, Output == S.Input {
+    // Remove duplicated elements
+    switch Output.self {
+    case is Bool.Type, is Bool?.Type:
+      subject.removeDuplicates { lhs, rhs in
+        (lhs as? Bool) == (rhs as? Bool)
+      }
+      .receive(subscriber: subscriber)
+    case is Int.Type, is Int?.Type:
+      subject.removeDuplicates { lhs, rhs in
+        (lhs as? Int) == (rhs as? Int)
+      }
+      .receive(subscriber: subscriber)
+    case is Double.Type, is Double?.Type:
+      subject.removeDuplicates { lhs, rhs in
+        (lhs as? Double) == (rhs as? Double)
+      }
+      .receive(subscriber: subscriber)
+    case is Float.Type, is Float?.Type:
+      subject.removeDuplicates { lhs, rhs in
+        (lhs as? Float) == (rhs as? Float)
+      }
+      .receive(subscriber: subscriber)
+    case is String.Type, is String?.Type:
+      subject.removeDuplicates { lhs, rhs in
+        (lhs as? String) == (rhs as? String)
+      }
+      .receive(subscriber: subscriber)
+    case is URL.Type, is URL?.Type:
+      subject.removeDuplicates { lhs, rhs in
+        (lhs as? URL) == (rhs as? URL)
+      }
+      .receive(subscriber: subscriber)
+    case is Data.Type, is Data?.Type:
+      subject.removeDuplicates { lhs, rhs in
+        (lhs as? Data) == (rhs as? Data)
+      }
+      .receive(subscriber: subscriber)
+    case is Date.Type, is Date?.Type:
+      subject.removeDuplicates { lhs, rhs in
+        (lhs as? Date) == (rhs as? Date)
+      }
+      .receive(subscriber: subscriber)
+    default:
       subject.receive(subscriber: subscriber)
     }
   }
