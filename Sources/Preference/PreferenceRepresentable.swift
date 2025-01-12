@@ -70,26 +70,14 @@ extension Int: PreferenceRepresentable {
     switch preferenceValue {
     case let val as Int:
       self = val
+    case let val as Bool:
+      self = NSNumber(value: val).intValue
+    case let val as Float:
+      self = NSNumber(value: val).intValue
+    case let val as Double:
+      self = NSNumber(value: val).intValue
     case let val as String:
       self = NSString(string: val).integerValue
-    default:
-      return nil
-    }
-  }
-
-  public var preferenceValue: Any? {
-    self
-  }
-}
-
-extension Double: PreferenceRepresentable {
-
-  public init?(preferenceValue: Any) {
-    switch preferenceValue {
-    case let val as Double:
-      self = val
-    case let val as String:
-      self = NSString(string: val).doubleValue
     default:
       return nil
     }
@@ -106,8 +94,38 @@ extension Float: PreferenceRepresentable {
     switch preferenceValue {
     case let val as Float:
       self = val
+    case let val as Bool:
+      self = NSNumber(value: val).floatValue
+    case let val as Int:
+      self = NSNumber(value: val).floatValue
+    case let val as Double:
+      self = NSNumber(value: val).floatValue
     case let val as String:
       self = NSString(string: val).floatValue
+    default:
+      return nil
+    }
+  }
+
+  public var preferenceValue: Any? {
+    self
+  }
+}
+
+extension Double: PreferenceRepresentable {
+
+  public init?(preferenceValue: Any) {
+    switch preferenceValue {
+    case let val as Double:
+      self = val
+    case let val as Bool:
+      self = NSNumber(value: val).doubleValue
+    case let val as Int:
+      self = NSNumber(value: val).doubleValue
+    case let val as Float:
+      self = NSNumber(value: val).doubleValue
+    case let val as String:
+      self = NSString(string: val).doubleValue
     default:
       return nil
     }
@@ -121,8 +139,20 @@ extension Float: PreferenceRepresentable {
 extension String: PreferenceRepresentable {
 
   public init?(preferenceValue: Any) {
-    guard let val = preferenceValue as? String else { return nil }
-    self = val
+    switch preferenceValue {
+    case let val as String:
+      self = val
+    case let val as Bool:
+      self = NSNumber(value: val).stringValue
+    case let val as Int:
+      self = NSNumber(value: val).stringValue
+    case let val as Float:
+      self = NSNumber(value: val).stringValue
+    case let val as Double:
+      self = NSNumber(value: val).stringValue
+    default:
+      return nil
+    }
   }
 
   public var preferenceValue: Any? {
@@ -147,10 +177,10 @@ extension URL: PreferenceRepresentable {
         self = url as URL
       } else {
         // Fallback on earlier versions
-        guard let url = NSKeyedUnarchiver.unarchiveObject(with: val) as? NSURL else {
+        guard let url = NSKeyedUnarchiver.unarchiveObject(with: val) as? URL else {
           return nil
         }
-        self = url as URL
+        self = url
       }
     default:
       return nil
@@ -183,10 +213,20 @@ extension Data: PreferenceRepresentable {
 
 extension Date: PreferenceRepresentable {
   public init?(preferenceValue: Any) {
-    guard let val = preferenceValue as? Date else {
+    switch preferenceValue {
+    case let val as Date:
+      self = val
+    case let val as Int:
+      self = Date(timeIntervalSinceReferenceDate: NSNumber(value: val).doubleValue)
+    case let val as Float:
+      self = Date(timeIntervalSinceReferenceDate: NSNumber(value: val).doubleValue)
+    case let val as Double:
+      self = Date(timeIntervalSinceReferenceDate: val)
+    case let val as String:
+      self = Date(timeIntervalSinceReferenceDate: NSString(string: val).doubleValue)
+    default:
       return nil
     }
-    self = val
   }
 
   public var preferenceValue: Any? {
