@@ -36,6 +36,14 @@ $isFlagged.sink {
 .store(in: &cancellable)
 ```
 
+### Use different UserDefaults
+
+```swift
+let customized: UserDefaults
+
+@Preference("isFlagged", store: customized) var isFlagged = false
+```
+
 ## Installation
 
 ### Swift Package Manager
@@ -43,7 +51,7 @@ $isFlagged.sink {
 Add the following dependency to your **Package.swift** file:
 
 ```swift
-.package(url: "https://github.com/hdtls/swift-preference", from: "1.2.0")
+.package(url: "https://github.com/hdtls/swift-preference", from: "1.3.0")
 ```
 
 ## License
