@@ -24,7 +24,7 @@
 
 import Foundation
 
-#if canImport(Darwin)
+#if canImport(Combine)
   @_exported import Combine
 #else
   @_exported import OpenCombine

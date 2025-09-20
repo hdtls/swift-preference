@@ -119,7 +119,7 @@ class PreferenceTests: XCTestCase {
       XCTAssertEqual(store.bool(forKey: "BoolValue"), newValue)
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let newValue = Bool.random()
         if newValue != oldValue {
@@ -166,7 +166,7 @@ class PreferenceTests: XCTestCase {
       }
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let allowedValues = [nil, Bool.random()]
         let newValue = allowedValues.randomElement()!
@@ -212,7 +212,7 @@ class PreferenceTests: XCTestCase {
       XCTAssertEqual(store.integer(forKey: "IntValue"), newValue)
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let newValue = Int.random(in: 0...255)
         if newValue != oldValue {
@@ -259,7 +259,7 @@ class PreferenceTests: XCTestCase {
       }
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let allowedValues = [nil, Int.random(in: 0...255)]
         let newValue = allowedValues.randomElement()!
@@ -305,7 +305,7 @@ class PreferenceTests: XCTestCase {
       XCTAssertEqual(store.double(forKey: "DoubleValue"), newValue)
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let newValue = Double.random(in: 0...255)
         if newValue != oldValue {
@@ -352,7 +352,7 @@ class PreferenceTests: XCTestCase {
       }
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let allowedValues = [nil, Double.random(in: 0...255)]
         let newValue = allowedValues.randomElement()!
@@ -398,7 +398,7 @@ class PreferenceTests: XCTestCase {
       XCTAssertEqual(store.float(forKey: "FloatValue"), newValue)
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let newValue = Float.random(in: 0...255)
         if newValue != oldValue {
@@ -445,7 +445,7 @@ class PreferenceTests: XCTestCase {
       }
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let allowedValues = [nil, Float.random(in: 0...255)]
         let newValue = allowedValues.randomElement()!
@@ -491,7 +491,7 @@ class PreferenceTests: XCTestCase {
       XCTAssertEqual(store.string(forKey: "StringValue"), newValue)
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let newValue = String.random()
         if newValue != oldValue {
@@ -538,7 +538,7 @@ class PreferenceTests: XCTestCase {
       }
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let allowedValues = [nil, String.random()]
         let newValue = allowedValues.randomElement()!
@@ -584,7 +584,7 @@ class PreferenceTests: XCTestCase {
       XCTAssertEqual(store.url(forKey: "URLValue")?.absoluteURL.path, newValue.absoluteURL.path)
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let newValue = URL(string: "https://" + .random() + ".com")!
         if newValue != oldValue {
@@ -631,7 +631,7 @@ class PreferenceTests: XCTestCase {
       }
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let allowedValues = [nil, URL(string: "https://" + .random() + ".com")]
         let newValue = allowedValues.randomElement()!
@@ -677,7 +677,7 @@ class PreferenceTests: XCTestCase {
       XCTAssertEqual(store.data(forKey: "DataValue"), newValue)
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let newValue = Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max) })
         if newValue != oldValue {
@@ -724,7 +724,7 @@ class PreferenceTests: XCTestCase {
       }
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let allowedValues = [nil, Data((0...10).map { _ in UInt8.random(in: .min...UInt8.max) })]
         let newValue = allowedValues.randomElement()!
@@ -770,7 +770,7 @@ class PreferenceTests: XCTestCase {
       XCTAssertEqual(store.object(forKey: "DateValue") as? Date, newValue)
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let newValue = Date.distantPast
         if newValue != oldValue {
@@ -817,7 +817,7 @@ class PreferenceTests: XCTestCase {
       }
     }
 
-    #if canImport(Darwin)
+    #if canImport(Combine)
       for _ in 0..<10 {
         let allowedValues = [nil, Date.distantPast]
         let newValue = allowedValues.randomElement()!
