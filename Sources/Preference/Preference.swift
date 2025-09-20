@@ -125,7 +125,11 @@ extension UserDefaults.FieldKey: ExpressibleByStringLiteral {
     set { publisher.value = newValue }
   }
 
-  public var projectedValue: Publisher<Value> { publisher }
+  #if canImport(Combine)
+    public var projectedValue: some Combine.Publisher<Value, Never> { publisher }
+  #else
+    public var projectedValue: some OpenCombine.Publisher<Value, Never> { publisher }
+  #endif
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
@@ -163,7 +167,7 @@ extension Preference where Value: ExpressibleByNilLiteral {
 extension Preference {
 
   @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-  final public class Publisher<Output>: NSObject where Output: PreferenceRepresentable {
+  final class Publisher<Output>: NSObject where Output: PreferenceRepresentable {
 
     public typealias Failure = Never
 
@@ -308,7 +312,7 @@ extension Preference {
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension Preference.Publisher: Publisher {
 
-  public func receive<S>(
+  func receive<S>(
     subscriber: S
   ) where S: Subscriber, Failure == S.Failure, Output == S.Input {
     // Remove duplicated elements
